@@ -1419,17 +1419,25 @@ function handleFile(file){
       const headers=rows[0];
       const data=rows.slice(1).filter(r=>r.some(c=>(c||'').trim())).map((r,i)=>mapCSVRow(headers,r,batch,i)).filter(p=>p.name);
       pendingImport=data;
-      const cols=['name','phone','nric','gender','birthYear','policies','premiumPerYear','savings','priorities','extraNotes'];
-      const visible=cols.filter(c=>data.slice(0,5).some(p=>(p[c]||'').toString().trim()));
-      document.getElementById('importPreview').innerHTML=`<div class="import-preview"><table><tr>${visible.map(c=>`<th>${c}</th>`).join('')}</tr>${data.slice(0,5).map(p=>`<tr>${visible.map(c=>`<td title="${esc(String(p[c]??''))}">${esc(String(p[c]??''))}</td>`).join('')}</tr>`).join('')}</table></div>`;
-      document.getElementById('importStatus').textContent=`${data.length} prospects found · preview shows first 5`;
-      const btn=document.getElementById('btnConfirmImport');btn.style.display='';btn.textContent=`Import ${data.length} Prospects`;
+      const statusEl=document.getElementById('importStatus');
+      const btn=document.getElementById('btnConfirmImport');
+      if(data.length===0){
+        statusEl.innerHTML=`<span style="color:#f87171;font-weight:600">0 prospects found.</span> Detected columns in your CSV:<br/><span style="color:#9aa3b0;font-size:11px">${headers.map(h=>`"${esc(h.trim())}"`).join(', ')}</span><br/><span style="color:#6b7a8d;font-size:11px;margin-top:4px;display:block">The "Name" column is required. Rename your name column to <strong>Name</strong> if it uses a different heading.</span>`;
+        btn.style.display='none';
+        document.getElementById('importPreview').innerHTML='';
+      }else{
+        const cols=['name','phone','nric','gender','birthYear','policies','premiumPerYear','savings','priorities','extraNotes'];
+        const visible=cols.filter(c=>data.slice(0,5).some(p=>(p[c]||'').toString().trim()));
+        document.getElementById('importPreview').innerHTML=`<div class="import-preview"><table><tr>${visible.map(c=>`<th>${c}</th>`).join('')}</tr>${data.slice(0,5).map(p=>`<tr>${visible.map(c=>`<td title="${esc(String(p[c]??''))}">${esc(String(p[c]??''))}</td>`).join('')}</tr>`).join('')}</table></div>`;
+        statusEl.textContent=`${data.length} prospects found · preview shows first 5`;
+        btn.style.display='';btn.textContent=`Import ${data.length} Prospects`;
+      }
     }catch(err){toast('Parse error: '+err.message);}
   };
   reader.readAsText(file,'UTF-8');
 }
 function parseCSV(text){
-  text=text.replace(/\r\n/g,'\n').replace(/\r/g,'\n');
+  text=text.replace(/^﻿/,'').replace(/\r\n/g,'\n').replace(/\r/g,'\n');
   const rows=[];let row=[],field='',inQ=false;
   for(let i=0;i<text.length;i++){const c=text[i];if(inQ){if(c==='"'&&text[i+1]==='"'){field+='"';i++;}else if(c==='"'){inQ=false;}else field+=c;}else{if(c==='"'){inQ=true;}else if(c===','){row.push(field);field='';}else if(c==='\n'){row.push(field);field='';rows.push(row);row=[];}else field+=c;}}
   if(field||row.length){row.push(field);rows.push(row);}return rows;
@@ -1439,7 +1447,7 @@ function mapCSVRow(headers,row,batch,rowIndex=0){
   const isAXS=b?.type==='axs'||batch.toLowerCase().startsWith('axs');
   const get=(...names)=>{for(const n of names){const idx=headers.findIndex(h=>(h||'').toLowerCase().trim()===(n||'').toLowerCase().trim());if(idx>=0&&idx<row.length)return(row[idx]||'').trim();}return'';};
   const bool=v=>['y','yes','true','1'].includes((v||'').toLowerCase().trim());
-  return{name:get('name'),preferredName:get('preferred name'),nric:get('nric'),gender:get('gender').toUpperCase().replace(/[^MF]/g,''),phone:get('hp number'),birthYear:parseInt(get('year of birth'))||null,batch,leadType:isAXS?'axs':'ekko',status:'New',calledCount:parseInt(get('called no. of times?','called how many times?','called no. of times'))||0,pickedUp:bool(get('pick up?','pick up')),contacted:false,meetingSet:false,met:bool(get('met')),purchased:bool(get('purchased')),referral:false,policies:isAXS?'':get('policies'),premiumPerYear:isAXS?'':get('premiums / year incepted','premiums/year incepted'),savings:isAXS?get('savings'):'',priorities:isAXS?get('priorities'):'',extraNotes:get('extra notes'),followUpDate:'',followUpHistory:[],rowIndex};
+  return{name:get('name','full name','fullname','customer name','client name','prospect name','contact name','client','prospect'),preferredName:get('preferred name','preferred','nickname','nick name'),nric:get('nric','ic','ic no','nric no','id'),gender:get('gender','sex'),phone:get('hp number','phone','mobile','contact no','contact number','hp','handphone','hp no','mobile no'),birthYear:parseInt(get('year of birth','birth year','dob year','yob','year'))||null,batch,leadType:isAXS?'axs':'ekko',status:'New',calledCount:parseInt(get('called no. of times?','called how many times?','called no. of times','times called'))||0,pickedUp:bool(get('pick up?','pick up','picked up')),contacted:false,meetingSet:false,met:bool(get('met')),purchased:bool(get('purchased','converted')),referral:false,policies:isAXS?'':get('policies','policy'),premiumPerYear:isAXS?'':get('premiums / year incepted','premiums/year incepted','premium/year','premium per year'),savings:isAXS?get('savings'):'',priorities:isAXS?get('priorities'):'',extraNotes:get('extra notes','notes','remarks','comments'),followUpDate:'',followUpHistory:[],rowIndex};
 }
 window._confirmImport=async()=>{
   if(!pendingImport.length)return;
