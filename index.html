@@ -144,6 +144,11 @@
     .batch-card-add:hover{border-color:var(--gold-border);background:var(--gold-glow);}
     .batch-card-add-icon{font-size:24px;opacity:.4;}
     .batch-card-add-label{font-size:12px;color:var(--dim);}
+    /* Drag-and-drop */
+    .batch-card[draggable="true"]{cursor:grab;}
+    .batch-card[draggable="true"]:active{cursor:grabbing;}
+    .batch-card.dragging{opacity:.3;transform:scale(.97);box-shadow:none!important;}
+    .batch-card.drag-over{border-color:var(--gold)!important;box-shadow:0 0 24px rgba(240,165,0,.3)!important;transform:translateY(-4px);}
 
     /* ══════════════════════════════════
        PROSPECTS VIEW
@@ -565,6 +570,13 @@ async function loadBatches(){
         batches.push({id:ref.id,...b});
       }
     }
+    // Sort: respect saved sortOrder if any batch has it, else natural name order
+    const hasSortOrder=batches.some(b=>b.sortOrder!==undefined);
+    if(hasSortOrder){
+      batches.sort((a,b)=>(a.sortOrder??9999)-(b.sortOrder??9999));
+    }else{
+      batches.sort((a,b)=>a.name.localeCompare(b.name,undefined,{numeric:true,sensitivity:'base'}));
+    }
   }catch(e){toast('Error loading batches: '+e.message);}
 }
 
@@ -575,6 +587,12 @@ async function addBatch(name,type){
     renderDashboard();
     toast(`Batch "${name}" added ✓`);
   }catch(e){toast('Error: '+e.message);}
+}
+
+async function saveBatchOrder(){
+  try{
+    await Promise.all(batches.map((b,i)=>updateDoc(doc(db,'batches',b.id),{sortOrder:i})));
+  }catch(e){toast('Error saving order: '+e.message);}
 }
 
 async function renameBatch(id,newName){
@@ -864,6 +882,45 @@ function renderBatchGrid(){
     <div class="batch-card-add-label">Add New Batch</div>
   </div>`;
   document.getElementById('batchGrid').innerHTML=html;
+  setupBatchDrag();
+}
+
+let _dragSrcIdx=null;
+function setupBatchDrag(){
+  const cards=[...document.querySelectorAll('#batchGrid .batch-card:not(.batch-card-add)')];
+  cards.forEach((card,idx)=>{
+    card.setAttribute('draggable','true');
+    card.addEventListener('dragstart',e=>{
+      _dragSrcIdx=idx;
+      setTimeout(()=>card.classList.add('dragging'),0);
+      e.dataTransfer.effectAllowed='move';
+      e.dataTransfer.setData('text/plain',String(idx));
+    });
+    card.addEventListener('dragend',()=>{
+      card.classList.remove('dragging');
+      document.querySelectorAll('#batchGrid .batch-card').forEach(c=>c.classList.remove('drag-over'));
+    });
+    card.addEventListener('dragover',e=>{
+      e.preventDefault();
+      document.querySelectorAll('#batchGrid .batch-card').forEach(c=>c.classList.remove('drag-over'));
+      card.classList.add('drag-over');
+      e.dataTransfer.dropEffect='move';
+    });
+    card.addEventListener('dragleave',e=>{
+      if(!card.contains(e.relatedTarget))card.classList.remove('drag-over');
+    });
+    card.addEventListener('drop',async e=>{
+      e.preventDefault();e.stopPropagation();
+      document.querySelectorAll('#batchGrid .batch-card').forEach(c=>c.classList.remove('drag-over'));
+      if(_dragSrcIdx===null||_dragSrcIdx===idx){_dragSrcIdx=null;return;}
+      const moved=batches.splice(_dragSrcIdx,1)[0];
+      batches.splice(idx,0,moved);
+      _dragSrcIdx=null;
+      renderBatchGrid();
+      await saveBatchOrder();
+      toast('Order saved ✓');
+    });
+  });
 }
 
 // Batch actions
