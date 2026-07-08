@@ -554,7 +554,10 @@ async function loadAll(){
 async function loadBatches(){
   try{
     const snap=await getDocs(query(collection(db,'batches'),orderBy('createdAt','asc')));
-    batches=snap.docs.map(d=>({id:d.id,...d.data()}));
+    const all=snap.docs.map(d=>({id:d.id,...d.data()}));
+    // Deduplicate by name — keep oldest entry per name, silently drop extras
+    const seen=new Set();
+    batches=all.filter(b=>{if(seen.has(b.name))return false;seen.add(b.name);return true;});
     if(batches.length===0){
       // seed defaults
       for(const b of DEFAULT_BATCHES){
@@ -843,7 +846,8 @@ function renderBatchGrid(){
       ${apptBadge}
       <div class="batch-card-actions" onclick="event.stopPropagation()">
         <div class="batch-action-btn" onclick="window._renameBatch('${b.id}')" title="Rename">✎</div>
-        <div class="batch-action-btn del" onclick="window._deleteBatch('${b.id}')" title="Delete">✕</div>
+        <div class="batch-action-btn del" onclick="window._clearBatch('${b.id}','${esc(b.name)}')" title="Clear all prospects (reimport)">🗑</div>
+        <div class="batch-action-btn del" onclick="window._deleteBatch('${b.id}')" title="Delete batch">✕</div>
       </div>
       <div class="batch-card-head" style="${apptBadge?'margin-top:24px':''}">
         <div class="batch-card-name">${esc(b.name)}</div>
@@ -903,6 +907,22 @@ window._submitRename=async id=>{
   await renameBatch(id,name);
 };
 window._deleteBatch=id=>deleteBatch(id);
+
+async function clearBatchProspects(batchName){
+  const bProspects=prospects.filter(p=>p.batch===batchName);
+  if(!bProspects.length){toast('No prospects in this batch');return;}
+  if(!confirm(`Delete all ${bProspects.length} prospects in "${batchName}"?\n\nThis cannot be undone. You can then reimport a fresh CSV.`))return;
+  try{
+    const chunks=[];for(let i=0;i<bProspects.length;i+=20)chunks.push(bProspects.slice(i,i+20));
+    for(const chunk of chunks){await Promise.all(chunk.map(p=>deleteDoc(doc(db,'prospects',p.id))));}
+    prospects=prospects.filter(p=>p.batch!==batchName);
+    renderDashboard();
+    toast(`Cleared all prospects from "${batchName}" ✓ — ready to reimport`);
+  }catch(e){toast('Error: '+e.message);}
+}
+window._clearBatch=(id,name)=>{clearBatchProspects(name);};
+// Alias used by dashboard search go-to
+function showBatch(name){showProspects(name);}
 
 // ── Prospects render ──
 function getFiltered(){
@@ -1351,7 +1371,7 @@ window._submitAdd=async()=>{
   if(!batch){toast('Please select a batch');return;}
   const b=batches.find(x=>x.name===batch);
   const isAXS=b?.type==='axs'||batch.toLowerCase().startsWith('axs');
-  const data={name,preferredName:document.getElementById('an_pname').value.trim(),phone:document.getElementById('an_phone').value.trim(),nric:document.getElementById('an_nric').value.trim(),gender:document.getElementById('an_gender').value,birthYear:parseInt(document.getElementById('an_by').value)||null,batch,leadType:isAXS?'axs':'ekko',status:document.getElementById('an_status').value||'New',calledCount:0,pickedUp:false,met:false,purchased:false,followUpDate:'',followUpHistory:[],extraNotes:document.getElementById('an_notes').value.trim(),policies:'',premiumPerYear:'',savings:'',priorities:''};
+  const data={name,preferredName:document.getElementById('an_pname').value.trim(),phone:document.getElementById('an_phone').value.trim(),nric:document.getElementById('an_nric').value.trim(),gender:document.getElementById('an_gender').value,birthYear:parseInt(document.getElementById('an_by').value)||null,batch,leadType:isAXS?'axs':'ekko',status:document.getElementById('an_status').value||'New',calledCount:0,pickedUp:false,contacted:false,meetingSet:false,met:false,purchased:false,referral:false,followUpDate:'',followUpHistory:[],extraNotes:document.getElementById('an_notes').value.trim(),policies:'',premiumPerYear:'',savings:'',priorities:''};
   if(isAXS){data.savings=document.getElementById('an_savings')?.value||'';data.priorities=document.getElementById('an_priorities')?.value.trim()||'';}
   else{data.policies=document.getElementById('an_policies')?.value.trim()||'';data.premiumPerYear=document.getElementById('an_premium')?.value.trim()||'';}
   document.getElementById('addModal')?.remove();
@@ -1419,7 +1439,7 @@ function mapCSVRow(headers,row,batch,rowIndex=0){
   const isAXS=b?.type==='axs'||batch.toLowerCase().startsWith('axs');
   const get=(...names)=>{for(const n of names){const idx=headers.findIndex(h=>(h||'').toLowerCase().trim()===(n||'').toLowerCase().trim());if(idx>=0&&idx<row.length)return(row[idx]||'').trim();}return'';};
   const bool=v=>['y','yes','true','1'].includes((v||'').toLowerCase().trim());
-  return{name:get('name'),preferredName:get('preferred name'),nric:get('nric'),gender:get('gender').toUpperCase().replace(/[^MF]/g,''),phone:get('hp number'),birthYear:parseInt(get('year of birth'))||null,batch,leadType:isAXS?'axs':'ekko',status:'New',calledCount:parseInt(get('called no. of times?','called how many times?','called no. of times'))||0,pickedUp:bool(get('pick up?','pick up')),met:bool(get('met')),purchased:bool(get('purchased')),policies:isAXS?'':get('policies'),premiumPerYear:isAXS?'':get('premiums / year incepted','premiums/year incepted'),savings:isAXS?get('savings'):'',priorities:isAXS?get('priorities'):'',extraNotes:get('extra notes'),followUpDate:'',followUpHistory:[],rowIndex};
+  return{name:get('name'),preferredName:get('preferred name'),nric:get('nric'),gender:get('gender').toUpperCase().replace(/[^MF]/g,''),phone:get('hp number'),birthYear:parseInt(get('year of birth'))||null,batch,leadType:isAXS?'axs':'ekko',status:'New',calledCount:parseInt(get('called no. of times?','called how many times?','called no. of times'))||0,pickedUp:bool(get('pick up?','pick up')),contacted:false,meetingSet:false,met:bool(get('met')),purchased:bool(get('purchased')),referral:false,policies:isAXS?'':get('policies'),premiumPerYear:isAXS?'':get('premiums / year incepted','premiums/year incepted'),savings:isAXS?get('savings'):'',priorities:isAXS?get('priorities'):'',extraNotes:get('extra notes'),followUpDate:'',followUpHistory:[],rowIndex};
 }
 window._confirmImport=async()=>{
   if(!pendingImport.length)return;
