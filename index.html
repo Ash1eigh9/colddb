@@ -367,6 +367,44 @@
       .user-email{display:none;}
       .batch-grid{grid-template-columns:1fr 1fr;}
     }
+    /* Nav tabs */
+    .nav-tabs{display:flex;gap:2px;margin-left:12px;}
+    .nav-tab{background:none;border:1px solid transparent;color:var(--dim);padding:5px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;letter-spacing:.03em;white-space:nowrap;}
+    .nav-tab:hover{color:var(--text);background:rgba(255,255,255,.05);}
+    .nav-tab.active{color:var(--gold);background:var(--gold-glow);border-color:var(--gold-border);}
+    /* Sales view */
+    #salesView{flex:1;overflow-y:auto;padding:24px 28px;display:none;}
+    #salesView::-webkit-scrollbar{width:5px;}
+    #salesView::-webkit-scrollbar-thumb{background:rgba(240,165,0,.15);border-radius:3px;}
+    .sales-hero{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-bottom:28px;}
+    .sales-source-card{background:rgba(10,20,36,.7);border:1px solid rgba(240,165,0,.12);border-radius:16px;padding:20px 22px;}
+    .sales-source-card.ekko{border-color:rgba(96,165,250,.2);background:rgba(96,165,250,.04);}
+    .sales-source-card.axs{border-color:rgba(192,132,252,.2);background:rgba(192,132,252,.04);}
+    .sales-source-card.total{border-color:rgba(240,165,0,.2);background:rgba(240,165,0,.04);}
+    .ssc-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+    .ssc-title.ekko{color:#60a5fa;}.ssc-title.axs{color:#c084fc;}.ssc-title.total{color:var(--gold);}
+    .ssc-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+    .ssc-metric{display:flex;flex-direction:column;gap:3px;}
+    .ssc-label{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;}
+    .ssc-value{font-size:18px;font-weight:800;color:var(--text);}
+    .ssc-value.green{color:#4ade80;}
+    .ssc-sub{font-size:10px;color:var(--dim);}
+    .ssc-divider{border:none;border-top:1px solid rgba(255,255,255,.06);margin:12px 0;}
+    .ssc-efficiency{display:flex;flex-direction:column;gap:6px;margin-top:4px;}
+    .ssc-eff-row{display:flex;justify-content:space-between;align-items:center;font-size:11px;}
+    .ssc-eff-label{color:var(--muted);}
+    .ssc-eff-val{font-weight:700;color:var(--text);}
+    .winner-badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px;margin-left:6px;background:rgba(74,222,128,.12);color:#4ade80;border:1px solid rgba(74,222,128,.25);}
+    /* Closings table */
+    .closings-table{width:100%;border-collapse:collapse;font-size:13px;}
+    .closings-table th{position:sticky;top:0;background:rgba(4,9,18,.95);backdrop-filter:blur(12px);padding:8px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.07em;border-bottom:1px solid var(--border);white-space:nowrap;z-index:5;}
+    .closings-table td{padding:9px 10px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle;}
+    .closings-table tbody tr:hover td{background:rgba(240,165,0,.04);}
+    .closing-action{cursor:pointer;color:var(--dim);font-size:13px;padding:2px 6px;border-radius:4px;transition:color .12s;}
+    .closing-action:hover{color:var(--text);}
+    .closing-action.del:hover{color:#f87171;}
+    .tag-ekko-sm{background:rgba(96,165,250,.12);color:#60a5fa;border:1px solid rgba(96,165,250,.25);padding:1px 7px;border-radius:5px;font-size:10px;font-weight:700;letter-spacing:.04em;}
+    .tag-axs-sm{background:rgba(192,132,252,.12);color:#c084fc;border:1px solid rgba(192,132,252,.25);padding:1px 7px;border-radius:5px;font-size:10px;font-weight:700;letter-spacing:.04em;}
   </style>
 </head>
 <body>
@@ -399,10 +437,15 @@
   <!-- Topbar -->
   <div class="topbar">
     <div class="topbar-logo" onclick="window._goHome()">ColdDB</div>
+    <div class="nav-tabs" id="navTabs">
+      <button class="nav-tab active" id="navDash" onclick="window._goHome()">Dashboard</button>
+      <button class="nav-tab" id="navSales" onclick="window._goSales()">💰 Sales</button>
+    </div>
     <div class="topbar-crumb" id="topbarCrumb"></div>
     <div class="spacer"></div>
     <button class="btn btn-secondary" id="btnImport" style="display:none">↑ Import CSV</button>
     <button class="btn btn-primary" id="btnAdd">+ Add Prospect</button>
+    <button class="btn btn-primary" id="btnAddClosing" style="display:none" onclick="window._addClosingModal()">+ Log Closing</button>
     <span class="user-email" id="userEmail"></span>
     <button class="btn btn-ghost" id="btnSignOut">Sign out</button>
   </div>
@@ -501,6 +544,32 @@
     </div>
   </div>
 
+  <!-- SALES VIEW -->
+  <div id="salesView">
+    <div style="max-width:1200px;margin:0 auto;">
+      <div class="dash-section-title" style="margin-bottom:20px">Sales Overview</div>
+      <div class="sales-hero" id="salesHero"></div>
+      <div class="dash-section-title" style="margin-bottom:12px">Closing Log</div>
+      <div style="overflow-x:auto;">
+        <table class="closings-table">
+          <thead><tr>
+            <th>Date</th>
+            <th>Client</th>
+            <th>Batch</th>
+            <th>Source</th>
+            <th>APE (S$)</th>
+            <th>Commission (S$)</th>
+            <th>Comm %</th>
+            <th>Notes</th>
+            <th></th>
+          </tr></thead>
+          <tbody id="closingsTbody"></tbody>
+        </table>
+        <div id="closingsEmpty" style="display:none;padding:40px;text-align:center;color:var(--dim);font-size:13px">No closings logged yet. Hit <strong>+ Log Closing</strong> to record your first deal.</div>
+      </div>
+    </div>
+  </div>
+
 </div><!-- /app -->
 
 <div id="toast"></div>
@@ -519,6 +588,7 @@ const auth=getAuth(fbApp);
 // ── State ──
 let prospects=[];
 let batches=[];
+let closings=[];
 let selectedId=null;
 let pendingImport=[];
 let currentView='dashboard';
@@ -551,7 +621,7 @@ document.getElementById('btnSignOut').addEventListener('click',()=>signOut(auth)
 
 // ── Load all data ──
 async function loadAll(){
-  await Promise.all([loadBatches(),loadProspects()]);
+  await Promise.all([loadBatches(),loadProspects(),loadClosings()]);
   showDashboard();
 }
 
@@ -594,6 +664,194 @@ async function saveBatchOrder(){
     await Promise.all(batches.map((b,i)=>updateDoc(doc(db,'batches',b.id),{sortOrder:i})));
   }catch(e){toast('Error saving order: '+e.message);}
 }
+
+// ── Closings ──
+async function loadClosings(){
+  try{
+    const snap=await getDocs(query(collection(db,'closings'),orderBy('closedDate','desc')));
+    closings=snap.docs.map(d=>({id:d.id,...d.data()}));
+  }catch(e){toast('Error loading closings: '+e.message);}
+}
+
+function showSales(){
+  currentView='sales';
+  document.getElementById('dashView').style.display='none';
+  document.getElementById('prospectView').style.display='none';
+  document.getElementById('salesView').style.display='block';
+  document.getElementById('btnImport').style.display='none';
+  document.getElementById('btnAdd').style.display='none';
+  document.getElementById('btnAddClosing').style.display='';
+  document.getElementById('navTabs').style.display='flex';
+  document.getElementById('navDash').classList.remove('active');
+  document.getElementById('navSales').classList.add('active');
+  document.getElementById('topbarCrumb').innerHTML='';
+  renderSales();
+}
+window._goSales=()=>showSales();
+
+function fmt(n){return'S$'+Number(n||0).toLocaleString('en-SG',{minimumFractionDigits:0,maximumFractionDigits:0});}
+function fmtK(n){const v=Number(n||0);return v>=1000?'S$'+(v/1000).toFixed(1)+'k':fmt(v);}
+
+function renderSales(){
+  const ekkoProspects=prospects.filter(p=>{const b=batches.find(x=>x.name===p.batch);return b&&b.type==='ekko';});
+  const axsProspects=prospects.filter(p=>{const b=batches.find(x=>x.name===p.batch);return b&&b.type==='axs';});
+  const ekkoC=closings.filter(c=>c.batchType==='ekko');
+  const axsC=closings.filter(c=>c.batchType==='axs');
+  const allC=closings;
+
+  function stats(list,leadCount){
+    const n=list.length;
+    const ape=list.reduce((s,c)=>s+(Number(c.ape)||0),0);
+    const comm=list.reduce((s,c)=>s+(Number(c.commission)||0),0);
+    const avgApe=n?ape/n:0;
+    const commRate=ape?(comm/ape*100):0;
+    const apePerLead=leadCount?ape/leadCount:0;
+    const commPerLead=leadCount?comm/leadCount:0;
+    const closeRate=leadCount?(n/leadCount*100):0;
+    return{n,ape,comm,avgApe,commRate,apePerLead,commPerLead,closeRate};
+  }
+  const ek=stats(ekkoC,ekkoProspects.length);
+  const ax=stats(axsC,axsProspects.length);
+  const tot=stats(allC,prospects.length);
+
+  // Determine winner per metric (higher = better for all)
+  function winner(ekVal,axVal){
+    if(!ekVal&&!axVal)return{ek:false,ax:false};
+    return{ek:ekVal>=axVal,ax:axVal>ekVal};
+  }
+  const wApe=winner(ek.apePerLead,ax.apePerLead);
+  const wComm=winner(ek.commPerLead,ax.commPerLead);
+  const wClose=winner(ek.closeRate,ax.closeRate);
+  const wAvg=winner(ek.avgApe,ax.avgApe);
+
+  function sourceCard(type,s,leads,w){
+    const color=type==='ekko'?'#60a5fa':'#c084fc';
+    const label=type==='ekko'?'EKKO':'AXS';
+    return`<div class="sales-source-card ${type}">
+      <div class="ssc-title ${type}">${label} <span style="color:var(--dim);font-size:10px;font-weight:400">${leads} leads</span></div>
+      <div class="ssc-grid">
+        <div class="ssc-metric"><div class="ssc-label">Closings</div><div class="ssc-value">${s.n}</div></div>
+        <div class="ssc-metric"><div class="ssc-label">Total APE</div><div class="ssc-value">${fmtK(s.ape)}</div></div>
+        <div class="ssc-metric"><div class="ssc-label">Commission</div><div class="ssc-value green">${fmtK(s.comm)}</div></div>
+        <div class="ssc-metric"><div class="ssc-label">Avg Deal</div><div class="ssc-value">${fmtK(s.avgApe)}</div></div>
+      </div>
+      <hr class="ssc-divider"/>
+      <div class="ssc-efficiency">
+        <div class="ssc-eff-row"><span class="ssc-eff-label">Close rate${w.close?`<span class="winner-badge">★ Better</span>`:''}</span><span class="ssc-eff-val" style="color:${color}">${s.closeRate.toFixed(1)}%</span></div>
+        <div class="ssc-eff-row"><span class="ssc-eff-label">APE / lead${w.ape?`<span class="winner-badge">★ Better</span>`:''}</span><span class="ssc-eff-val" style="color:${color}">${fmtK(s.apePerLead)}</span></div>
+        <div class="ssc-eff-row"><span class="ssc-eff-label">Comm / lead${w.comm?`<span class="winner-badge">★ Better</span>`:''}</span><span class="ssc-eff-val" style="color:${color}">${fmtK(s.commPerLead)}</span></div>
+        <div class="ssc-eff-row"><span class="ssc-eff-label">Comm rate</span><span class="ssc-eff-val">${s.commRate.toFixed(1)}%</span></div>
+      </div>
+    </div>`;
+  }
+
+  const totalCard=`<div class="sales-source-card total">
+    <div class="ssc-title total">All Sources</div>
+    <div class="ssc-grid">
+      <div class="ssc-metric"><div class="ssc-label">Total Deals</div><div class="ssc-value">${tot.n}</div></div>
+      <div class="ssc-metric"><div class="ssc-label">Total APE</div><div class="ssc-value">${fmtK(tot.ape)}</div></div>
+      <div class="ssc-metric"><div class="ssc-label">Total Comm</div><div class="ssc-value green">${fmtK(tot.comm)}</div></div>
+      <div class="ssc-metric"><div class="ssc-label">Avg Deal</div><div class="ssc-value">${fmtK(tot.avgApe)}</div></div>
+    </div>
+    <hr class="ssc-divider"/>
+    <div class="ssc-efficiency">
+      <div class="ssc-eff-row"><span class="ssc-eff-label">Overall close rate</span><span class="ssc-eff-val" style="color:var(--gold)">${tot.closeRate.toFixed(1)}%</span></div>
+      <div class="ssc-eff-row"><span class="ssc-eff-label">APE per lead</span><span class="ssc-eff-val" style="color:var(--gold)">${fmtK(tot.apePerLead)}</span></div>
+      <div class="ssc-eff-row"><span class="ssc-eff-label">Commission per lead</span><span class="ssc-eff-val" style="color:var(--gold)">${fmtK(tot.commPerLead)}</span></div>
+      <div class="ssc-eff-row"><span class="ssc-eff-label">Overall comm rate</span><span class="ssc-eff-val">${tot.commRate.toFixed(1)}%</span></div>
+    </div>
+  </div>`;
+
+  document.getElementById('salesHero').innerHTML=
+    sourceCard('ekko',ek,ekkoProspects.length,{ape:wApe.ek,comm:wComm.ek,close:wClose.ek,avg:wAvg.ek})+
+    sourceCard('axs',ax,axsProspects.length,{ape:wApe.ax,comm:wComm.ax,close:wClose.ax,avg:wAvg.ax})+
+    totalCard;
+
+  const tbody=document.getElementById('closingsTbody');
+  const empty=document.getElementById('closingsEmpty');
+  if(!closings.length){tbody.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  tbody.innerHTML=closings.map(c=>`<tr>
+    <td style="color:var(--muted);white-space:nowrap">${c.closedDate||'—'}</td>
+    <td style="font-weight:600">${esc(c.name||'—')}</td>
+    <td style="color:var(--muted)">${esc(c.batchName||'—')}</td>
+    <td><span class="${c.batchType==='ekko'?'tag-ekko-sm':'tag-axs-sm'}">${c.batchType==='ekko'?'EKKO':'AXS'}</span></td>
+    <td style="font-weight:700;color:#60a5fa">${fmt(c.ape)}</td>
+    <td style="font-weight:700;color:#4ade80">${fmt(c.commission)}</td>
+    <td style="color:var(--muted)">${c.ape?((c.commission/c.ape)*100).toFixed(1)+'%':'—'}</td>
+    <td style="color:var(--dim);font-size:11px;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(c.notes||'')}</td>
+    <td style="white-space:nowrap">
+      <span class="closing-action" onclick="window._editClosing('${c.id}')" title="Edit">✎</span>
+      <span class="closing-action del" onclick="window._deleteClosing('${c.id}')" title="Delete">✕</span>
+    </td>
+  </tr>`).join('');
+}
+
+function closingModal(existing=null){
+  const isEdit=!!existing;
+  const batchOpts=batches.map(b=>`<option value="${esc(b.name)}|${b.type}" ${existing&&existing.batchName===b.name?'selected':''}>${esc(b.name)} (${b.type==='ekko'?'EKKO':'AXS'})</option>`).join('');
+  const modal=document.createElement('div');modal.className='modal-bg';modal.id='closingModal';
+  modal.innerHTML=`<div class="modal">
+    <h2>${isEdit?'Edit Closing':'Log a Closing'}</h2>
+    <div class="field-row">
+      <div class="fg"><label>Client Name</label><input id="cm_name" placeholder="e.g. John Tan" value="${esc(existing?.name||'')}"/></div>
+      <div class="fg"><label>Date Closed</label><input id="cm_date" type="date" value="${existing?.closedDate||new Date().toISOString().slice(0,10)}"/></div>
+    </div>
+    <div class="field-row single"><div class="fg"><label>Batch</label>
+      <select id="cm_batch"><option value="">— Select batch —</option>${batchOpts}</select>
+    </div></div>
+    <div class="field-row">
+      <div class="fg"><label>APE (S$)</label><input id="cm_ape" type="number" min="0" placeholder="e.g. 3000" value="${existing?.ape||''}"/></div>
+      <div class="fg"><label>Commission (S$)</label><input id="cm_comm" type="number" min="0" placeholder="e.g. 240" value="${existing?.commission||''}"/></div>
+    </div>
+    <div class="field-row single"><div class="fg"><label>Notes (optional)</label><input id="cm_notes" placeholder="Product type, remarks…" value="${esc(existing?.notes||'')}"/></div></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="document.getElementById('closingModal').remove()">Cancel</button>
+      <button class="btn btn-primary" id="cm_save">${isEdit?'Save Changes':'Log Closing'}</button>
+    </div>
+  </div>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click',e=>{if(e.target===modal)modal.remove();});
+  document.getElementById('cm_save').addEventListener('click',async()=>{
+    const name=document.getElementById('cm_name').value.trim();
+    const batchVal=document.getElementById('cm_batch').value;
+    const ape=parseFloat(document.getElementById('cm_ape').value)||0;
+    const commission=parseFloat(document.getElementById('cm_comm').value)||0;
+    const closedDate=document.getElementById('cm_date').value;
+    const notes=document.getElementById('cm_notes').value.trim();
+    if(!name){toast('Please enter a client name');return;}
+    if(!batchVal){toast('Please select a batch');return;}
+    if(!ape){toast('Please enter an APE amount');return;}
+    const[batchName,batchType]=batchVal.split('|');
+    const data={name,batchName,batchType,ape,commission,closedDate,notes};
+    try{
+      if(isEdit){
+        await updateDoc(doc(db,'closings',existing.id),data);
+        const idx=closings.findIndex(c=>c.id===existing.id);
+        if(idx>=0)closings[idx]={id:existing.id,...data};
+        toast('Closing updated ✓');
+      }else{
+        const ref=await addDoc(collection(db,'closings'),{...data,createdAt:serverTimestamp()});
+        closings.unshift({id:ref.id,...data});
+        toast('Closing logged ✓');
+      }
+      modal.remove();
+      renderSales();
+    }catch(e){toast('Error: '+e.message);}
+  });
+}
+
+window._addClosingModal=()=>closingModal();
+window._editClosing=id=>{const c=closings.find(x=>x.id===id);if(c)closingModal(c);};
+window._deleteClosing=async id=>{
+  if(!confirm('Delete this closing? This cannot be undone.'))return;
+  try{
+    await deleteDoc(doc(db,'closings',id));
+    closings=closings.filter(c=>c.id!==id);
+    renderSales();
+    toast('Closing deleted');
+  }catch(e){toast('Error: '+e.message);}
+};
 
 async function renameBatch(id,newName){
   try{
@@ -739,7 +997,13 @@ function showDashboard(){
   currentView='dashboard';
   document.getElementById('dashView').style.display='block';
   document.getElementById('prospectView').style.display='none';
+  document.getElementById('salesView').style.display='none';
   document.getElementById('btnImport').style.display='none';
+  document.getElementById('btnAdd').style.display='';
+  document.getElementById('btnAddClosing').style.display='none';
+  document.getElementById('navTabs').style.display='flex';
+  document.getElementById('navDash').classList.add('active');
+  document.getElementById('navSales').classList.remove('active');
   document.getElementById('topbarCrumb').innerHTML='';
   renderDashboard();
 }
@@ -749,8 +1013,12 @@ function showProspects(batchName=''){
   activeBatch=batchName;
   selectedId=null;
   document.getElementById('dashView').style.display='none';
+  document.getElementById('salesView').style.display='none';
   document.getElementById('prospectView').style.display='flex';
   document.getElementById('btnImport').style.display='';
+  document.getElementById('btnAdd').style.display='';
+  document.getElementById('btnAddClosing').style.display='none';
+  document.getElementById('navTabs').style.display='none';
   document.getElementById('fSearch').value='';
   document.getElementById('fStatus').value='';
   document.getElementById('fGender').value='';
