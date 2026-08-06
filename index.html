@@ -902,7 +902,7 @@ function closingModal(existing=null){
   };
   window._cmRemoveRider=i=>{cmRiders.splice(i,1);renderRiderSection();window._cmCalc();};
   window._cmRiderTerm=(i,v)=>{cmRiders[i].term=v;renderRiderSection();window._cmCalc();};
-  window._cmRiderPrem=(i,v)=>{cmRiders[i].premium=v;renderRiderSection();window._cmCalc();};
+  window._cmRiderPrem=(i,v)=>{cmRiders[i].premium=v;window._cmCalc();};
 
   window._cmCalc=()=>{
     const p=document.getElementById('cm_product').value;
