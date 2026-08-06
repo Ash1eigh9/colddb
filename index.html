@@ -598,7 +598,9 @@ let activeBatch=''; // batch filter for prospects view
 let sortState={col:null,dir:'asc'};
 
 // ── Income Insurance commission rates (from IAFA-Comms-Tracker) ──
-const PROD={"Complete Cancer Care (CBN3)":{terms:[{l:"10 years",y:22.00}]},"Complete Critical Protect (CCN1)":{terms:[{l:"10-14 years",y:22.00},{l:"15-19 years",y:33.00},{l:"20-24 years",y:44.00},{l:"25+ years",y:55.00}]},"Complete Life Secure (VQMW)":{terms:[{l:"5 years",y:10.00},{l:"6-9 years",y:10.20},{l:"10-14 years",y:22.00},{l:"15-19 years",y:33.00},{l:"20-24 years",y:44.00},{l:"25+ years",y:55.00}]},"Complete Life Secure - Protection Benefit (VQVW)":{terms:[{l:"5 years",y:10.00},{l:"6-9 years",y:10.20},{l:"10-14 years",y:22.00},{l:"15-19 years",y:33.00},{l:"20-24 years",y:44.00},{l:"25+ years",y:55.00}]},"Essential Protect (LBV3)":{terms:[{l:"5 years",y:12.50},{l:"6-9 years",y:13.00},{l:"10-14 years",y:18.00},{l:"15-19 years",y:26.00},{l:"20+ years",y:40.00}]},"Gro Annuity Pro (GAMA)":{terms:[{l:"Single",y:1.00}]},"Gro Cash Flex Pro (GCME)":{terms:[{l:"5yr (Policy=10)",y:5.50},{l:"5yr (Policy>10 <=25)",y:9.00},{l:"5yr (Policy>25)",y:10.00},{l:"10yr (Policy<=25)",y:18.20},{l:"10yr (Policy>25)",y:22.00},{l:"15yr (Policy<=25)",y:27.20},{l:"15yr (Policy>25)",y:33.00},{l:"20yr (Policy<=25)",y:36.30},{l:"20yr (Policy>25)",y:44.00},{l:"25+ years",y:55.00}]},"Gro Cash Plus (GDMW)":{terms:[{l:"3 years",y:4.05}]},"Gro Cash Sure (GCMW)":{terms:[{l:"5 years",y:11.50},{l:"10 years",y:18.30}]},"Gro Power Saver Pro (RSME)":{terms:[{l:"3 years",y:3.30}]},"Gro Retire Flex Pro (GRME)":{terms:[{l:"Single",y:3.50},{l:"5yr (Policy <=10)",y:5.50},{l:"5yr (Policy >10 <=25)",y:9.00},{l:"5yr (Policy >25)",y:10.00},{l:"10yr (Policy <=25)",y:18.20},{l:"10yr (Policy >25)",y:22.00},{l:"15yr (Policy <=25)",y:27.20},{l:"15yr (Policy >25)",y:33.00},{l:"20yr (Policy <=25)",y:36.30},{l:"20yr (Policy >25)",y:44.00},{l:"25+ years",y:55.00}]},"Gro Retire Flex Pro - Protection Benefit (SPV4)":{terms:[{l:"5yr (Policy <=10)",y:5.50},{l:"5yr (Policy >10 <=25)",y:9.00},{l:"5yr (Policy >25)",y:10.00},{l:"10yr (Policy <=25)",y:18.20},{l:"10yr (Policy >25)",y:22.00},{l:"15yr (Policy <=25)",y:27.20},{l:"15yr (Policy >25)",y:33.00},{l:"20yr (Policy <=25)",y:36.30},{l:"20yr (Policy >25)",y:44.00},{l:"25+ years",y:55.00}]},"Gro Saver Flex Pro (GSME)":{terms:[{l:"Single",y:3.00},{l:"5yr (Policy=10)",y:5.50},{l:"5yr (Policy>10 <=25)",y:9.00},{l:"5yr (Policy>25)",y:10.00},{l:"10yr (Policy<=25)",y:18.20},{l:"10yr (Policy>25)",y:22.00},{l:"15yr (Policy<=25)",y:27.20},{l:"15yr (Policy>25)",y:33.00},{l:"20yr (Policy<=25)",y:36.30},{l:"20yr (Policy>25)",y:44.00},{l:"25+ years",y:55.00}]},"Luxe Plus Solitaire II (LTMW)":{terms:[{l:"Single",y:3.25}]},"Mortgage Term (MPN2)":{terms:[{l:"3 years",y:10.50},{l:"4 years",y:11.50},{l:"5 years",y:12.50},{l:"6-9 years",y:13.00},{l:"10-14 years",y:18.00},{l:"15-19 years",y:26.00},{l:"20+ years",y:40.00}]},"Provenance Disability Accelerator (TSN3)":{terms:[{l:"Single",y:5.50}]},"Provenance Solitaire (VPMW)":{terms:[{l:"Single",y:5.50}]},"Provenance Solitaire - Protection Benefit (VPVW)":{terms:[{l:"Single",y:5.50}]},"Savings Protector Pro (SPV3)":{terms:[{l:"1yr (Policy <=10)",y:2.00},{l:"2yr (Policy <=10)",y:2.20},{l:"3yr (Policy <=10)",y:3.30},{l:"4yr (Policy <=10)",y:4.40},{l:"5yr (Policy <=10)",y:5.50},{l:"5yr (Policy >10 <=25)",y:9.00},{l:"5yr (Policy >25)",y:10.00},{l:"10yr (Policy <=25)",y:18.20},{l:"10yr (Policy >25)",y:22.00},{l:"15yr (Policy <=25)",y:27.20},{l:"15yr (Policy >25)",y:33.00},{l:"20yr (Policy <=25)",y:36.30},{l:"20yr (Policy >25)",y:44.00},{l:"25+ years",y:55.00}]},"Star Term Protect (TAN19)":{terms:[{l:"5 years",y:12.50},{l:"6-9 years",y:13.00},{l:"10-14 years",y:18.00},{l:"15-19 years",y:26.00},{l:"20-24 years",y:40.00},{l:"25+ years",y:40.00}]},"TermLife Solitaire (TBN4)":{terms:[{l:"6-9 years",y:13.00},{l:"10-14 years",y:18.00},{l:"15-19 years",y:26.00},{l:"20-24 years",y:41.20},{l:"25+ years",y:45.50}]},"Total Protect (TPV1)":{terms:[{l:"5 years",y:12.50},{l:"6-9 years",y:13.00},{l:"10-14 years",y:18.00},{l:"15-19 years",y:26.00},{l:"20+ years",y:40.00}]},"Wealth Plus Solitaire (LHMWA)":{terms:[{l:"Single",y:3.00}]},"AstraLink (VA2)":{terms:[{l:"MIP 10yr",y:22.00},{l:"MIP 15yr",y:33.00},{l:"MIP 20yr",y:44.00},{l:"MIP 25yr",y:55.00}]},"Invest Flex (VS1)":{terms:[{l:"5yr (All Policy Term)",y:3.85},{l:"10yr (All Policy Term)",y:23.95},{l:"15yr (All Policy Term)",y:48.55},{l:"20yr (All Policy Term)",y:52.35}]},"Invest Flex TriVantage (VS3)":{terms:[{l:"10yr (All Policy Term)",y:11.00}]},"Invest Flex Vantage (VS2)":{terms:[{l:"5yr (All Policy Term)",y:2.60},{l:"10yr (All Policy Term)",y:23.00},{l:"15yr (All Policy Term)",y:44.20},{l:"20yr (All Policy Term)",y:46.00}]},"WealthLink (GL3)":{terms:[{l:"Single",y:1.50}]},"Care Secure":{terms:[{l:"Yearly",y:45.00}]},"Enhanced IncomeShield / IncomeShield Standard (ISEP)":{terms:[{l:"Yearly",y:30.00}]},"PrimeShield":{terms:[{l:"Yearly",y:35.00}]},"Legacy Flex Solitaire (VA3R)":{terms:[{l:"MIP 5yr",y:18.00},{l:"MIP 10yr",y:25.00}]},"Legacy Flex Solitaire (VA3S)":{terms:[{l:"Single (5yr Policy)",y:4.50}]}};
+const WAIVER_TERMS=[{l:"2 years",y:7.50},{l:"3 years",y:8.00},{l:"4 years",y:8.50},{l:"5 years",y:10.00},{l:"6-9 years",y:10.50},{l:"10-14 years",y:22.00},{l:"15-19 years",y:26.00},{l:"20+ years",y:40.00}];
+const RIDER_TERMS={"Disability Accelerator (TCN2)":[{l:"6-9 years",y:13.00},{l:"10-14 years",y:18.00},{l:"15-19 years",y:26.00},{l:"20-24 years",y:41.20},{l:"25+ years",y:45.50}],"Essential Protect (LBV3)":[{l:"5 years",y:12.50},{l:"6-9 years",y:13.00},{l:"10-14 years",y:18.00},{l:"15-19 years",y:26.00},{l:"20+ years",y:40.00}],"Total Protect (TPV1)":[{l:"5 years",y:12.50},{l:"6-9 years",y:13.00},{l:"10-14 years",y:18.00},{l:"15-19 years",y:26.00},{l:"20+ years",y:40.00}],"Advanced Critical Secure (CSV10)":[{l:"5 years",y:10.00},{l:"6-9 years",y:10.20},{l:"10-14 years",y:22.00},{l:"15-19 years",y:33.00},{l:"20-24 years",y:44.00},{l:"25+ years",y:55.00}],"Early Critical Secure (CSV11)":[{l:"5 years",y:10.00},{l:"6-9 years",y:10.20},{l:"10-14 years",y:22.00},{l:"15-19 years",y:33.00},{l:"20-24 years",y:44.00},{l:"25+ years",y:55.00}],"Cancer Premium Waiver / GIO (WPV10)":WAIVER_TERMS,"Payor Premium Waiver (WPV6)":WAIVER_TERMS,"Enhanced Payor Premium Waiver (WEV2)":WAIVER_TERMS,"Dread Disease Premium Waiver (WSV2)":WAIVER_TERMS,"Hospital CashAid (HBV3)":[{l:"All Terms",y:20.00}],"Lady 360 (LPN)":[{l:"All Terms",y:20.00}],"Maternity 360 (MBN)":[{l:"Single",y:5.00}],"Essential Care Rider":[{l:"Yearly",y:15.00}],"Optima Care Rider":[{l:"Yearly",y:15.00}],"Classic Care Rider (ISEPL)":[{l:"Yearly",y:15.00}],"Deluxe Care Rider (ISEPH)":[{l:"Yearly",y:15.00}]};
+const PROD={"Complete Cancer Care (CBN3)":{terms:[{l:"10 years",y:22.00}]},"Complete Critical Protect (CCN1)":{riders:["Dread Disease Premium Waiver (WSV2)"],terms:[{l:"10-14 years",y:22.00},{l:"15-19 years",y:33.00},{l:"20-24 years",y:44.00},{l:"25+ years",y:55.00}]},"Complete Life Secure (VQMW)":{riders:["Advanced Critical Secure (CSV10)","Early Critical Secure (CSV11)","Hospital CashAid (HBV3)","Dread Disease Premium Waiver (WSV2)"],terms:[{l:"5 years",y:10.00},{l:"6-9 years",y:10.20},{l:"10-14 years",y:22.00},{l:"15-19 years",y:33.00},{l:"20-24 years",y:44.00},{l:"25+ years",y:55.00}]},"Complete Life Secure - Protection Benefit (VQVW)":{terms:[{l:"5 years",y:10.00},{l:"6-9 years",y:10.20},{l:"10-14 years",y:22.00},{l:"15-19 years",y:33.00},{l:"20-24 years",y:44.00},{l:"25+ years",y:55.00}]},"Essential Protect (LBV3)":{terms:[{l:"5 years",y:12.50},{l:"6-9 years",y:13.00},{l:"10-14 years",y:18.00},{l:"15-19 years",y:26.00},{l:"20+ years",y:40.00}]},"Gro Annuity Pro (GAMA)":{terms:[{l:"Single",y:1.00}]},"Gro Cash Flex Pro (GCME)":{terms:[{l:"5yr (Policy=10)",y:5.50},{l:"5yr (Policy>10 <=25)",y:9.00},{l:"5yr (Policy>25)",y:10.00},{l:"10yr (Policy<=25)",y:18.20},{l:"10yr (Policy>25)",y:22.00},{l:"15yr (Policy<=25)",y:27.20},{l:"15yr (Policy>25)",y:33.00},{l:"20yr (Policy<=25)",y:36.30},{l:"20yr (Policy>25)",y:44.00},{l:"25+ years",y:55.00}]},"Gro Cash Plus (GDMW)":{terms:[{l:"3 years",y:4.05}]},"Gro Cash Sure (GCMW)":{terms:[{l:"5 years",y:11.50},{l:"10 years",y:18.30}]},"Gro Power Saver Pro (RSME)":{terms:[{l:"3 years",y:3.30}]},"Gro Retire Flex Pro (GRME)":{terms:[{l:"Single",y:3.50},{l:"5yr (Policy <=10)",y:5.50},{l:"5yr (Policy >10 <=25)",y:9.00},{l:"5yr (Policy >25)",y:10.00},{l:"10yr (Policy <=25)",y:18.20},{l:"10yr (Policy >25)",y:22.00},{l:"15yr (Policy <=25)",y:27.20},{l:"15yr (Policy >25)",y:33.00},{l:"20yr (Policy <=25)",y:36.30},{l:"20yr (Policy >25)",y:44.00},{l:"25+ years",y:55.00}]},"Gro Retire Flex Pro - Protection Benefit (SPV4)":{terms:[{l:"5yr (Policy <=10)",y:5.50},{l:"5yr (Policy >10 <=25)",y:9.00},{l:"5yr (Policy >25)",y:10.00},{l:"10yr (Policy <=25)",y:18.20},{l:"10yr (Policy >25)",y:22.00},{l:"15yr (Policy <=25)",y:27.20},{l:"15yr (Policy >25)",y:33.00},{l:"20yr (Policy <=25)",y:36.30},{l:"20yr (Policy >25)",y:44.00},{l:"25+ years",y:55.00}]},"Gro Saver Flex Pro (GSME)":{terms:[{l:"Single",y:3.00},{l:"5yr (Policy=10)",y:5.50},{l:"5yr (Policy>10 <=25)",y:9.00},{l:"5yr (Policy>25)",y:10.00},{l:"10yr (Policy<=25)",y:18.20},{l:"10yr (Policy>25)",y:22.00},{l:"15yr (Policy<=25)",y:27.20},{l:"15yr (Policy>25)",y:33.00},{l:"20yr (Policy<=25)",y:36.30},{l:"20yr (Policy>25)",y:44.00},{l:"25+ years",y:55.00}]},"Luxe Plus Solitaire II (LTMW)":{terms:[{l:"Single",y:3.25}]},"Mortgage Term (MPN2)":{terms:[{l:"3 years",y:10.50},{l:"4 years",y:11.50},{l:"5 years",y:12.50},{l:"6-9 years",y:13.00},{l:"10-14 years",y:18.00},{l:"15-19 years",y:26.00},{l:"20+ years",y:40.00}]},"Provenance Disability Accelerator (TSN3)":{terms:[{l:"Single",y:5.50}]},"Provenance Solitaire (VPMW)":{terms:[{l:"Single",y:5.50}]},"Provenance Solitaire - Protection Benefit (VPVW)":{terms:[{l:"Single",y:5.50}]},"Savings Protector Pro (SPV3)":{terms:[{l:"1yr (Policy <=10)",y:2.00},{l:"2yr (Policy <=10)",y:2.20},{l:"3yr (Policy <=10)",y:3.30},{l:"4yr (Policy <=10)",y:4.40},{l:"5yr (Policy <=10)",y:5.50},{l:"5yr (Policy >10 <=25)",y:9.00},{l:"5yr (Policy >25)",y:10.00},{l:"10yr (Policy <=25)",y:18.20},{l:"10yr (Policy >25)",y:22.00},{l:"15yr (Policy <=25)",y:27.20},{l:"15yr (Policy >25)",y:33.00},{l:"20yr (Policy <=25)",y:36.30},{l:"20yr (Policy >25)",y:44.00},{l:"25+ years",y:55.00}]},"Star Term Protect (TAN19)":{riders:["Essential Protect (LBV3)","Hospital CashAid (HBV3)","Total Protect (TPV1)","Dread Disease Premium Waiver (WSV2)"],terms:[{l:"5 years",y:12.50},{l:"6-9 years",y:13.00},{l:"10-14 years",y:18.00},{l:"15-19 years",y:26.00},{l:"20-24 years",y:40.00},{l:"25+ years",y:40.00}]},"TermLife Solitaire (TBN4)":{riders:["Disability Accelerator (TCN2)","Essential Protect (LBV3)","Hospital CashAid (HBV3)","Total Protect (TPV1)","Dread Disease Premium Waiver (WSV2)"],terms:[{l:"6-9 years",y:13.00},{l:"10-14 years",y:18.00},{l:"15-19 years",y:26.00},{l:"20-24 years",y:41.20},{l:"25+ years",y:45.50}]},"Total Protect (TPV1)":{terms:[{l:"5 years",y:12.50},{l:"6-9 years",y:13.00},{l:"10-14 years",y:18.00},{l:"15-19 years",y:26.00},{l:"20+ years",y:40.00}]},"Wealth Plus Solitaire (LHMWA)":{terms:[{l:"Single",y:3.00}]},"AstraLink (VA2)":{terms:[{l:"MIP 10yr",y:22.00},{l:"MIP 15yr",y:33.00},{l:"MIP 20yr",y:44.00},{l:"MIP 25yr",y:55.00}]},"Invest Flex (VS1)":{riders:["Cancer Premium Waiver / GIO (WPV10)","Dread Disease Premium Waiver (WSV2)"],terms:[{l:"5yr (All Policy Term)",y:3.85},{l:"10yr (All Policy Term)",y:23.95},{l:"15yr (All Policy Term)",y:48.55},{l:"20yr (All Policy Term)",y:52.35}]},"Invest Flex TriVantage (VS3)":{riders:["Cancer Premium Waiver / GIO (WPV10)","Dread Disease Premium Waiver (WSV2)"],terms:[{l:"10yr (All Policy Term)",y:11.00}]},"Invest Flex Vantage (VS2)":{riders:["Cancer Premium Waiver / GIO (WPV10)","Dread Disease Premium Waiver (WSV2)"],terms:[{l:"5yr (All Policy Term)",y:2.60},{l:"10yr (All Policy Term)",y:23.00},{l:"15yr (All Policy Term)",y:44.20},{l:"20yr (All Policy Term)",y:46.00}]},"WealthLink (GL3)":{terms:[{l:"Single",y:1.50}]},"Care Secure":{terms:[{l:"Yearly",y:45.00}]},"Enhanced IncomeShield / IncomeShield Standard (ISEP)":{riders:["Essential Care Rider","Optima Care Rider","Classic Care Rider (ISEPL)","Deluxe Care Rider (ISEPH)"],terms:[{l:"Yearly",y:30.00}]},"PrimeShield":{terms:[{l:"Yearly",y:35.00}]},"Legacy Flex Solitaire (VA3R)":{terms:[{l:"MIP 5yr",y:18.00},{l:"MIP 10yr",y:25.00}]},"Legacy Flex Solitaire (VA3S)":{terms:[{l:"Single (5yr Policy)",y:4.50}]}};
 const PROD_CATS=[
   {label:"Investment Linked Insurance",products:["AstraLink (VA2)","Invest Flex (VS1)","Invest Flex TriVantage (VS3)","Invest Flex Vantage (VS2)","Legacy Flex Solitaire (VA3R)","Legacy Flex Solitaire (VA3S)","WealthLink (GL3)"]},
   {label:"Traditional Life Insurance",products:["Complete Cancer Care (CBN3)","Complete Critical Protect (CCN1)","Complete Life Secure (VQMW)","Complete Life Secure - Protection Benefit (VQVW)","Essential Protect (LBV3)","Gro Annuity Pro (GAMA)","Gro Cash Flex Pro (GCME)","Gro Cash Plus (GDMW)","Gro Cash Sure (GCMW)","Gro Power Saver Pro (RSME)","Gro Retire Flex Pro (GRME)","Gro Retire Flex Pro - Protection Benefit (SPV4)","Gro Saver Flex Pro (GSME)","Luxe Plus Solitaire II (LTMW)","Mortgage Term (MPN2)","Provenance Disability Accelerator (TSN3)","Provenance Solitaire (VPMW)","Provenance Solitaire - Protection Benefit (VPVW)","Savings Protector Pro (SPV3)","Star Term Protect (TAN19)","TermLife Solitaire (TBN4)","Total Protect (TPV1)","Wealth Plus Solitaire (LHMWA)"]},
@@ -786,7 +788,7 @@ function renderSales(){
     <td style="font-weight:600">${esc(c.name||'—')}</td>
     <td style="color:var(--muted)">${esc(c.batchName||'—')}</td>
     <td><span class="${c.batchType==='ekko'?'tag-ekko-sm':'tag-axs-sm'}">${c.batchType==='ekko'?'EKKO':'AXS'}</span></td>
-    <td style="color:var(--text);font-size:11px;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${esc(c.product||'')}">${esc(c.product||'—')}</td>
+    <td style="color:var(--text);font-size:11px;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${esc(c.product||'')}">${esc(c.product||'—')}${c.riders?.length?` <span style="font-size:9px;background:rgba(192,132,252,.15);color:#c084fc;border:1px solid rgba(192,132,252,.25);border-radius:4px;padding:1px 5px">+${c.riders.length} rider${c.riders.length>1?'s':''}</span>`:''}</td>
     <td style="color:var(--muted);font-size:11px;white-space:nowrap">${esc(c.term||'—')}</td>
     <td style="font-weight:700;color:#60a5fa">${fmt(c.ape)}</td>
     <td style="font-weight:700;color:#4ade80">${fmt(c.commission)}</td>
@@ -801,12 +803,16 @@ function renderSales(){
 
 function closingModal(existing=null){
   const isEdit=!!existing;
+  // cmRiders: [{name, term, premium}]
+  let cmRiders=(existing?.riders||[]).map(r=>({...r}));
+
   const batchOpts=batches.map(b=>`<option value="${esc(b.name)}|${b.type}" ${existing&&existing.batchName===b.name?'selected':''}>${esc(b.name)} (${b.type==='ekko'?'EKKO':'AXS'})</option>`).join('');
   const prodOpts=PROD_CATS.map(cat=>`<optgroup label="${esc(cat.label)}">${cat.products.map(p=>`<option value="${esc(p)}" ${existing?.product===p?'selected':''}>${esc(p)}</option>`).join('')}</optgroup>`).join('');
   const selProd=existing?.product?PROD[existing.product]:null;
   const termOpts=selProd?selProd.terms.map(t=>`<option value="${esc(t.l)}" ${existing?.term===t.l?'selected':''}>${esc(t.l)} — ${t.y}%</option>`).join(''):'';
+
   const modal=document.createElement('div');modal.className='modal-bg';modal.id='closingModal';
-  modal.innerHTML=`<div class="modal">
+  modal.innerHTML=`<div class="modal" style="max-width:560px">
     <h2>${isEdit?'Edit Closing':'Log a Closing'}</h2>
     <div class="field-row">
       <div class="fg"><label>Client Name</label><input id="cm_name" placeholder="e.g. John Tan" value="${esc(existing?.name||'')}"/></div>
@@ -815,7 +821,7 @@ function closingModal(existing=null){
     <div class="field-row single"><div class="fg"><label>Batch</label>
       <select id="cm_batch"><option value="">— Select batch —</option>${batchOpts}</select>
     </div></div>
-    <div class="field-row single"><div class="fg"><label>Product</label>
+    <div class="field-row single"><div class="fg"><label>Base Product</label>
       <select id="cm_product" onchange="window._cmOnProd()"><option value="">— Select product —</option>${prodOpts}</select>
     </div></div>
     <div class="field-row">
@@ -824,9 +830,10 @@ function closingModal(existing=null){
       </div>
       <div class="fg"><label>APE (S$)</label><input id="cm_ape" type="number" min="0" placeholder="e.g. 3000" value="${existing?.ape||''}" oninput="window._cmCalc()"/></div>
     </div>
+    <div id="cm_rider_section" style="margin-top:4px"></div>
     <div class="field-row single"><div class="fg">
-      <label style="display:flex;align-items:center;gap:6px">Commission (S$) <span id="cm_comm_label" style="font-size:10px;color:var(--dim);">${existing?.product?'— auto-calculated':'— select product + term to auto-fill'}</span></label>
-      <input id="cm_comm" type="number" min="0" placeholder="Auto-filled once product selected" value="${existing?.commission||''}"/>
+      <label style="display:flex;align-items:center;gap:6px">Total Commission (S$) <span id="cm_comm_label" style="font-size:10px;color:var(--dim);">— auto-calculated, editable</span></label>
+      <input id="cm_comm" type="number" min="0" placeholder="Auto-filled" value="${existing?.commission||''}"/>
     </div></div>
     <div class="field-row single"><div class="fg"><label>Notes (optional)</label><input id="cm_notes" placeholder="Remarks, product mix, etc." value="${esc(existing?.notes||'')}"/></div></div>
     <div class="modal-actions">
@@ -837,6 +844,39 @@ function closingModal(existing=null){
   document.body.appendChild(modal);
   modal.addEventListener('click',e=>{if(e.target===modal)modal.remove();});
 
+  function getAvailRiders(prodName){
+    if(!prodName||!PROD[prodName])return[];
+    const added=new Set(cmRiders.map(r=>r.name));
+    return(PROD[prodName].riders||[]).filter(r=>!added.has(r));
+  }
+
+  function renderRiderSection(){
+    const prodName=document.getElementById('cm_product').value;
+    const allRiders=PROD[prodName]?.riders||[];
+    const sec=document.getElementById('cm_rider_section');
+    if(!allRiders.length){sec.innerHTML='';return;}
+    const avail=getAvailRiders(prodName);
+    let html=`<div style="border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:12px;margin-bottom:12px;background:rgba(0,0,0,.15)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:${cmRiders.length?'10px':'0'}">
+        <span style="font-size:11px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.07em">Riders</span>
+        ${avail.length?`<button class="btn btn-secondary" style="font-size:11px;padding:3px 10px" onclick="window._cmAddRider()">+ Add Rider</button>`:'<span style="font-size:11px;color:var(--dim)">All riders added</span>'}
+      </div>`;
+    cmRiders.forEach((r,i)=>{
+      const rTerms=RIDER_TERMS[r.name]||[];
+      const needsTerm=rTerms.length>1;
+      const rRate=needsTerm?(rTerms.find(x=>x.l===r.term)||null):rTerms[0]||null;
+      const rComm=rRate&&r.premium?((parseFloat(r.premium)||0)*rRate.y/100).toFixed(2):'—';
+      html+=`<div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:8px;padding:10px;margin-top:6px;display:grid;grid-template-columns:1fr${needsTerm?' 1fr':''} 1fr auto;gap:8px;align-items:end">
+        <div><div style="font-size:10px;color:var(--dim);margin-bottom:3px">Rider</div><div style="font-size:12px;color:var(--muted)">${esc(r.name)}</div></div>
+        ${needsTerm?`<div><div style="font-size:10px;color:var(--dim);margin-bottom:3px">Term</div><select style="width:100%;font-size:12px;padding:4px 6px;border-radius:6px;background:rgba(12,24,55,.9);border:1px solid rgba(51,65,85,.5);color:#f1f5f9" onchange="window._cmRiderTerm(${i},this.value)">${rTerms.map(t=>`<option value="${esc(t.l)}" ${r.term===t.l?'selected':''}>${esc(t.l)} — ${t.y}%</option>`).join('')}</select></div>`:''}
+        <div><div style="font-size:10px;color:var(--dim);margin-bottom:3px">Premium (S$)${rRate?` <span style="color:#4ade80">${rRate.y}%→ ${rComm}</span>`:''}</div><input type="number" min="0" placeholder="0" value="${r.premium||''}" style="width:100%;font-size:12px;padding:4px 6px;border-radius:6px;background:rgba(12,24,55,.9);border:1px solid rgba(51,65,85,.5);color:#f1f5f9" oninput="window._cmRiderPrem(${i},this.value)"/></div>
+        <div style="padding-bottom:2px"><span style="cursor:pointer;color:#f87171;font-size:16px;padding:2px 6px" onclick="window._cmRemoveRider(${i})" title="Remove">✕</span></div>
+      </div>`;
+    });
+    html+='</div>';
+    sec.innerHTML=html;
+  }
+
   window._cmOnProd=()=>{
     const p=document.getElementById('cm_product').value;
     const termSel=document.getElementById('cm_term');
@@ -845,21 +885,54 @@ function closingModal(existing=null){
       PROD[p].terms.forEach(t=>{const o=document.createElement('option');o.value=t.l;o.textContent=`${t.l} — ${t.y}%`;termSel.appendChild(o);});
       termSel.disabled=false;
     }else{termSel.disabled=true;}
+    cmRiders=[];
+    renderRiderSection();
     window._cmCalc();
   };
+
+  window._cmAddRider=()=>{
+    const prodName=document.getElementById('cm_product').value;
+    const avail=getAvailRiders(prodName);
+    if(!avail.length)return;
+    const name=avail[0];
+    const rTerms=RIDER_TERMS[name]||[];
+    cmRiders.push({name,term:rTerms.length===1?rTerms[0].l:'',premium:''});
+    renderRiderSection();
+    window._cmCalc();
+  };
+  window._cmRemoveRider=i=>{cmRiders.splice(i,1);renderRiderSection();window._cmCalc();};
+  window._cmRiderTerm=(i,v)=>{cmRiders[i].term=v;renderRiderSection();window._cmCalc();};
+  window._cmRiderPrem=(i,v)=>{cmRiders[i].premium=v;renderRiderSection();window._cmCalc();};
+
   window._cmCalc=()=>{
     const p=document.getElementById('cm_product').value;
     const t=document.getElementById('cm_term').value;
     const ape=parseFloat(document.getElementById('cm_ape').value)||0;
     const lbl=document.getElementById('cm_comm_label');
+    let baseComm=0,hasBase=false;
     if(p&&t&&ape&&PROD[p]){
       const term=PROD[p].terms.find(x=>x.l===t);
-      if(term){
-        document.getElementById('cm_comm').value=(ape*term.y/100).toFixed(2);
-        lbl.textContent=`— ${term.y}% of APE (editable)`;lbl.style.color='#4ade80';
-      }
+      if(term){baseComm=ape*term.y/100;hasBase=true;}
+    }
+    let riderComm=0;
+    cmRiders.forEach(r=>{
+      const rTerms=RIDER_TERMS[r.name]||[];
+      const needsTerm=rTerms.length>1;
+      const rRate=needsTerm?(rTerms.find(x=>x.l===r.term)||null):rTerms[0]||null;
+      if(rRate&&r.premium)riderComm+=(parseFloat(r.premium)||0)*rRate.y/100;
+    });
+    if(hasBase||riderComm>0){
+      const total=baseComm+riderComm;
+      document.getElementById('cm_comm').value=total.toFixed(2);
+      const parts=[];
+      if(hasBase)parts.push(`Base: S$${baseComm.toFixed(2)}`);
+      if(riderComm>0)parts.push(`Riders: S$${riderComm.toFixed(2)}`);
+      lbl.textContent=`— ${parts.join(' + ')} (editable)`;lbl.style.color='#4ade80';
     }else{lbl.textContent='— select product + term + APE to auto-fill';lbl.style.color='';}
   };
+
+  // Initial render if editing existing
+  if(selProd)renderRiderSection();
 
   document.getElementById('cm_save').addEventListener('click',async()=>{
     const name=document.getElementById('cm_name').value.trim();
@@ -874,7 +947,8 @@ function closingModal(existing=null){
     if(!batchVal){toast('Please select a batch');return;}
     if(!ape){toast('Please enter an APE amount');return;}
     const[batchName,batchType]=batchVal.split('|');
-    const data={name,batchName,batchType,product,term,ape,commission,closedDate,notes};
+    const riders=cmRiders.map(r=>({name:r.name,term:r.term||'',premium:parseFloat(r.premium)||0}));
+    const data={name,batchName,batchType,product,term,ape,commission,riders,closedDate,notes};
     try{
       if(isEdit){
         await updateDoc(doc(db,'closings',existing.id),data);
