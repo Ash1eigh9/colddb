@@ -405,6 +405,19 @@
     .closing-action.del:hover{color:#f87171;}
     .tag-ekko-sm{background:rgba(96,165,250,.12);color:#60a5fa;border:1px solid rgba(96,165,250,.25);padding:1px 7px;border-radius:5px;font-size:10px;font-weight:700;letter-spacing:.04em;}
     .tag-axs-sm{background:rgba(192,132,252,.12);color:#c084fc;border:1px solid rgba(192,132,252,.25);padding:1px 7px;border-radius:5px;font-size:10px;font-weight:700;letter-spacing:.04em;}
+    /* Closings grouped layout */
+    .cl-section{margin-bottom:22px;}
+    .cl-batch-hdr{display:flex;justify-content:space-between;align-items:center;padding:9px 14px;background:rgba(240,165,0,.06);border:1px solid rgba(240,165,0,.14);border-radius:10px;margin-bottom:8px;}
+    .cl-batch-name{font-size:12px;font-weight:800;color:var(--gold);text-transform:uppercase;letter-spacing:.07em;}
+    .cl-batch-stats{font-size:11px;color:var(--dim);text-align:right;}
+    .cl-client-block{border:1px solid rgba(255,255,255,.07);border-radius:8px;margin-bottom:6px;overflow:hidden;}
+    .cl-row{display:grid;grid-template-columns:150px 1fr 90px 104px 104px 56px;align-items:center;padding:10px 12px;gap:8px;font-size:13px;}
+    .cl-row:hover{background:rgba(240,165,0,.04);}
+    .cl-client-hdr{display:grid;grid-template-columns:150px 1fr 90px 104px 104px 56px;align-items:center;padding:10px 12px;gap:8px;background:rgba(255,255,255,.03);border-bottom:1px solid rgba(255,255,255,.06);}
+    .cl-policy-row{display:grid;grid-template-columns:16px 1fr 90px 104px 104px 56px;align-items:center;padding:7px 12px;border-top:1px solid rgba(255,255,255,.04);gap:8px;font-size:12px;}
+    .cl-policy-row:hover{background:rgba(255,255,255,.02);}
+    .cl-col-label{font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;padding:4px 12px 4px;display:grid;grid-template-columns:150px 1fr 90px 104px 104px 56px;gap:8px;}
+    .rider-badge{font-size:9px;background:rgba(192,132,252,.15);color:#c084fc;border:1px solid rgba(192,132,252,.25);border-radius:4px;padding:1px 5px;vertical-align:middle;}
   </style>
 </head>
 <body>
@@ -550,25 +563,8 @@
       <div class="dash-section-title" style="margin-bottom:20px">Sales Overview</div>
       <div class="sales-hero" id="salesHero"></div>
       <div class="dash-section-title" style="margin-bottom:12px">Closing Log</div>
-      <div style="overflow-x:auto;">
-        <table class="closings-table">
-          <thead><tr>
-            <th>Date</th>
-            <th>Client</th>
-            <th>Batch</th>
-            <th>Source</th>
-            <th>Product</th>
-            <th>Term</th>
-            <th>APE (S$)</th>
-            <th>Commission (S$)</th>
-            <th>Comm %</th>
-            <th>Notes</th>
-            <th></th>
-          </tr></thead>
-          <tbody id="closingsTbody"></tbody>
-        </table>
-        <div id="closingsEmpty" style="display:none;padding:40px;text-align:center;color:var(--dim);font-size:13px">No closings logged yet. Hit <strong>+ Log Closing</strong> to record your first deal.</div>
-      </div>
+      <div id="closingsContainer"></div>
+      <div id="closingsEmpty" style="display:none;padding:40px;text-align:center;color:var(--dim);font-size:13px">No closings logged yet. Hit <strong>+ Log Closing</strong> to record your first deal.</div>
     </div>
   </div>
 
@@ -779,26 +775,91 @@ function renderSales(){
     sourceCard('axs',ax,axsProspects.length,{ape:wApe.ax,comm:wComm.ax,close:wClose.ax,avg:wAvg.ax})+
     totalCard;
 
-  const tbody=document.getElementById('closingsTbody');
+  const container=document.getElementById('closingsContainer');
   const empty=document.getElementById('closingsEmpty');
-  if(!closings.length){tbody.innerHTML='';empty.style.display='block';return;}
+  if(!closings.length){container.innerHTML='';empty.style.display='block';return;}
   empty.style.display='none';
-  tbody.innerHTML=closings.map(c=>`<tr>
-    <td style="color:var(--muted);white-space:nowrap">${c.closedDate||'—'}</td>
-    <td style="font-weight:600">${esc(c.name||'—')}</td>
-    <td style="color:var(--muted)">${esc(c.batchName||'—')}</td>
-    <td><span class="${c.batchType==='ekko'?'tag-ekko-sm':'tag-axs-sm'}">${c.batchType==='ekko'?'EKKO':'AXS'}</span></td>
-    <td style="color:var(--text);font-size:11px;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${esc(c.product||'')}">${esc(c.product||'—')}${c.riders?.length?` <span style="font-size:9px;background:rgba(192,132,252,.15);color:#c084fc;border:1px solid rgba(192,132,252,.25);border-radius:4px;padding:1px 5px">+${c.riders.length} rider${c.riders.length>1?'s':''}</span>`:''}</td>
-    <td style="color:var(--muted);font-size:11px;white-space:nowrap">${esc(c.term||'—')}</td>
-    <td style="font-weight:700;color:#60a5fa">${fmt(c.ape)}</td>
-    <td style="font-weight:700;color:#4ade80">${fmt(c.commission)}</td>
-    <td style="color:var(--muted)">${c.ape?((c.commission/c.ape)*100).toFixed(1)+'%':'—'}</td>
-    <td style="color:var(--dim);font-size:11px;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${esc(c.notes||'')}">${esc(c.notes||'')}</td>
-    <td style="white-space:nowrap">
-      <span class="closing-action" onclick="window._editClosing('${c.id}')" title="Edit">✎</span>
-      <span class="closing-action del" onclick="window._deleteClosing('${c.id}')" title="Delete">✕</span>
-    </td>
-  </tr>`).join('');
+
+  // Group by batch → client (case-insensitive name match)
+  const byBatch={};
+  closings.forEach(c=>{
+    const batch=c.batchName||'Unknown Batch';
+    if(!byBatch[batch])byBatch[batch]={};
+    const key=(c.name||'—').trim().toLowerCase();
+    if(!byBatch[batch][key])byBatch[batch][key]={displayName:c.name||'—',entries:[]};
+    byBatch[batch][key].entries.push(c);
+  });
+  // Sort batches by natural name order
+  const sortedBatches=Object.keys(byBatch).sort((a,b)=>a.localeCompare(b,undefined,{numeric:true,sensitivity:'base'}));
+
+  function riderBadge(c){return c.riders?.length?`<span class="rider-badge">+${c.riders.length}r</span>`:''}
+  function actions(c){return`<span class="closing-action" onclick="window._editClosing('${c.id}')" title="Edit">✎</span><span class="closing-action del" onclick="window._deleteClosing('${c.id}')" title="Delete">✕</span>`;}
+  function prodCell(c){return`<span style="color:var(--text)">${esc(c.product||'—')}</span>${riderBadge(c)}<span style="color:var(--dim);font-size:10px;margin-left:4px">${esc(c.term||'')}</span>`;}
+
+  let html='';
+  sortedBatches.forEach(batchName=>{
+    const clients=byBatch[batchName];
+    const allE=Object.values(clients).flatMap(g=>g.entries);
+    const batchAPE=allE.reduce((s,c)=>s+(Number(c.ape)||0),0);
+    const batchComm=allE.reduce((s,c)=>s+(Number(c.commission)||0),0);
+    const btype=allE[0]?.batchType;
+    const srcTag=btype?`<span class="${btype==='ekko'?'tag-ekko-sm':'tag-axs-sm'}" style="margin-left:8px">${btype==='ekko'?'EKKO':'AXS'}</span>`:'';
+
+    html+=`<div class="cl-section">
+      <div class="cl-batch-hdr">
+        <span class="cl-batch-name">${esc(batchName)}${srcTag}</span>
+        <span class="cl-batch-stats">${Object.keys(clients).length} client${Object.keys(clients).length!==1?'s':''} · ${allE.length} closing${allE.length!==1?'s':''}<br/><span style="color:#60a5fa;font-weight:700">${fmt(batchAPE)} APE</span> · <span style="color:#4ade80;font-weight:700">${fmt(batchComm)} comm</span></span>
+      </div>
+      <div class="cl-col-label"><span>Client</span><span>Product · Term</span><span>Date</span><span>APE</span><span>Commission</span><span></span></div>`;
+
+    // Sort clients by most recent closing date
+    const sortedClients=Object.values(clients).sort((a,b)=>{
+      const dA=a.entries.map(e=>e.closedDate||'').sort().reverse()[0]||'';
+      const dB=b.entries.map(e=>e.closedDate||'').sort().reverse()[0]||'';
+      return dB.localeCompare(dA);
+    });
+
+    sortedClients.forEach(({displayName,entries})=>{
+      entries.sort((a,b)=>(b.closedDate||'').localeCompare(a.closedDate||''));
+      const multi=entries.length>1;
+      const totalAPE=entries.reduce((s,c)=>s+(Number(c.ape)||0),0);
+      const totalComm=entries.reduce((s,c)=>s+(Number(c.commission)||0),0);
+      html+=`<div class="cl-client-block">`;
+      if(multi){
+        html+=`<div class="cl-client-hdr">
+          <div style="font-weight:700">${esc(displayName)}</div>
+          <div style="font-size:11px;color:var(--dim)">${entries.length} products</div>
+          <div style="font-size:11px;color:var(--dim)">${entries[entries.length-1].closedDate||''} – ${entries[0].closedDate||''}</div>
+          <div style="font-weight:700;color:#60a5fa">${fmt(totalAPE)}</div>
+          <div style="font-weight:700;color:#4ade80">${fmt(totalComm)}</div>
+          <div></div>
+        </div>`;
+        entries.forEach(c=>{
+          html+=`<div class="cl-policy-row">
+            <div style="color:var(--dim)">↳</div>
+            <div>${prodCell(c)}${c.notes?`<span style="color:var(--dim);font-size:10px;margin-left:6px" title="${esc(c.notes)}">📝</span>`:''}</div>
+            <div style="color:var(--muted);font-size:11px">${c.closedDate||'—'}</div>
+            <div style="font-weight:600;color:#60a5fa">${fmt(c.ape)}</div>
+            <div style="font-weight:600;color:#4ade80">${fmt(c.commission)}</div>
+            <div style="white-space:nowrap">${actions(c)}</div>
+          </div>`;
+        });
+      }else{
+        const c=entries[0];
+        html+=`<div class="cl-row">
+          <div style="font-weight:700">${esc(displayName)}</div>
+          <div style="font-size:11px">${prodCell(c)}${c.notes?`<span style="color:var(--dim);font-size:10px;margin-left:6px" title="${esc(c.notes)}">📝</span>`:''}</div>
+          <div style="color:var(--muted);font-size:11px">${c.closedDate||'—'}</div>
+          <div style="font-weight:700;color:#60a5fa">${fmt(c.ape)}</div>
+          <div style="font-weight:700;color:#4ade80">${fmt(c.commission)}</div>
+          <div style="white-space:nowrap">${actions(c)}</div>
+        </div>`;
+      }
+      html+=`</div>`;
+    });
+    html+=`</div>`;
+  });
+  container.innerHTML=html;
 }
 
 function closingModal(existing=null){
