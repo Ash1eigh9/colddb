@@ -1416,20 +1416,19 @@ function setupBatchDrag(){
     // Card is NOT draggable by default — only becomes draggable when grabbing the handle.
     // This prevents draggable="true" from eating click events (a Chrome quirk).
 
-    // Click router — works reliably because card has no draggable attribute
-    card.addEventListener('click',e=>{
-      const actionEl=e.target.closest('[data-action]');
-      if(actionEl){
-        const action=actionEl.dataset.action;
-        const bid=actionEl.dataset.bid;
+    // Direct listeners on each action element — stopPropagation keeps card body-click out
+    card.querySelectorAll('[data-action]').forEach(btn=>{
+      btn.addEventListener('click',e=>{
+        e.stopPropagation();
+        const {action,bid,bname2}=btn.dataset;
         if(action==='rename')window._renameBatch(bid);
-        else if(action==='clear')window._clearBatch(bid,actionEl.dataset.bname2);
+        else if(action==='clear')window._clearBatch(bid,bname2);
         else if(action==='delete')window._deleteBatch(bid);
-        else if(action==='date')window._pickBatchDate(bid,actionEl);
-        return;
-      }
-      window._viewBatch(card.dataset.bname||'');
+        else if(action==='date')window._pickBatchDate(bid,btn);
+      });
     });
+    // Card body — only fires when no action element caught it
+    card.addEventListener('click',()=>window._viewBatch(card.dataset.bname||''));
 
     // Enable drag only when pressing the drag handle
     const handle=card.querySelector('.batch-drag-handle');
