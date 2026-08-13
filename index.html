@@ -1378,17 +1378,17 @@ function renderBatchGrid(){
     if(apptToday.length)apptBadge=`<div class="appt-badge today"><span class="appt-ping"></span>${apptToday.length} appt today!</div>`;
     else if(apptSoon.length)apptBadge=`<div class="appt-badge soon"><span class="appt-ping"></span>${apptSoon.length} appt in 3 days</div>`;
     else if(apptWeek.length)apptBadge=`<div class="appt-badge week"><span class="appt-ping"></span>${apptWeek.length} appt this fortnight</div>`;
-    html+=`<div class="batch-card" onclick="window._viewBatch('${esc(b.name)}')">
+    html+=`<div class="batch-card" data-bname="${esc(b.name)}">
       ${apptBadge}
-      <div class="batch-card-actions" onclick="event.stopPropagation()">
-        <div class="batch-action-btn" onclick="window._renameBatch('${b.id}')" title="Rename">✎</div>
-        <div class="batch-action-btn del" onclick="window._clearBatch('${b.id}','${esc(b.name)}')" title="Clear all prospects (reimport)">🗑</div>
-        <div class="batch-action-btn del" onclick="window._deleteBatch('${b.id}')" title="Delete batch">✕</div>
+      <div class="batch-card-actions">
+        <div class="batch-action-btn" data-action="rename" data-bid="${b.id}" title="Rename">✎</div>
+        <div class="batch-action-btn del" data-action="clear" data-bid="${b.id}" data-bname2="${esc(b.name)}" title="Clear all prospects (reimport)">🗑</div>
+        <div class="batch-action-btn del" data-action="delete" data-bid="${b.id}" title="Delete batch">✕</div>
       </div>
       <div class="batch-card-head" style="${apptBadge?'margin-top:24px':''}">
         <div>
           <div class="batch-card-name">${esc(b.name)}</div>
-          <div class="batch-date-btn ${b.leadsDate?'batch-date-set':''}" onclick="window._dateClick(event,'${b.id}',this)">📅 ${b.leadsDate?fmtLeadsDate(b.leadsDate):'Set leads date'}</div>
+          <div class="batch-date-btn ${b.leadsDate?'batch-date-set':''}" data-action="date" data-bid="${b.id}">📅 ${b.leadsDate?fmtLeadsDate(b.leadsDate):'Set leads date'}</div>
         </div>
         <span class="batch-type-tag ${b.type==='axs'?'tag-axs':'tag-ekko'}">${b.type==='axs'?'AXS':'Ekko'}</span>
       </div>
@@ -1411,6 +1411,23 @@ function setupBatchDrag(){
   const cards=[...document.querySelectorAll('#batchGrid .batch-card:not(.batch-card-add)')];
   cards.forEach((card,idx)=>{
     card.setAttribute('draggable','true');
+
+    // Single click router — checks what was actually clicked
+    card.addEventListener('click',e=>{
+      const actionEl=e.target.closest('[data-action]');
+      if(actionEl){
+        const action=actionEl.dataset.action;
+        const bid=actionEl.dataset.bid;
+        if(action==='rename')window._renameBatch(bid);
+        else if(action==='clear')window._clearBatch(bid,actionEl.dataset.bname2);
+        else if(action==='delete')window._deleteBatch(bid);
+        else if(action==='date')window._pickBatchDate(bid,actionEl);
+        return; // never navigate
+      }
+      // Clicked on the card body — navigate into batch
+      window._viewBatch(card.dataset.bname||'');
+    });
+
     card.addEventListener('dragstart',e=>{
       _dragSrcIdx=idx;
       setTimeout(()=>card.classList.add('dragging'),0);
