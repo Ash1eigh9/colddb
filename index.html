@@ -151,8 +151,10 @@
     #batchDatePicker input[type=date]{width:100%;padding:8px 10px;border-radius:8px;border:1px solid rgba(51,65,85,.5);background:rgba(12,24,55,.9);color:#f1f5f9;font-size:13px;font-family:inherit;}
     #batchDatePicker input[type=date]:focus{outline:none;border-color:rgba(240,165,0,.5);}
     /* Drag-and-drop */
-    .batch-card[draggable="true"]{cursor:grab;}
-    .batch-card[draggable="true"]:active{cursor:grabbing;}
+    .batch-drag-handle{position:absolute;bottom:10px;right:12px;opacity:0;cursor:grab;font-size:15px;color:var(--dim);transition:opacity .15s;user-select:none;line-height:1;padding:2px;}
+    .batch-card:hover .batch-drag-handle{opacity:.35;}
+    .batch-drag-handle:hover{opacity:.8!important;color:var(--gold)!important;}
+    .batch-drag-handle:active{cursor:grabbing;}
     .batch-card.dragging{opacity:.3;transform:scale(.97);box-shadow:none!important;}
     .batch-card.drag-over{border-color:var(--gold)!important;box-shadow:0 0 24px rgba(240,165,0,.3)!important;transform:translateY(-4px);}
 
@@ -1395,6 +1397,7 @@ function renderBatchGrid(){
       <div class="batch-card-count">${total}</div>
       <div class="batch-card-sub">${total===1?'prospect':'prospects'}</div>
       ${total?`<div class="batch-funnel">${funnelRows}</div>${coldLine}`:'<div style="color:var(--dim);font-size:11px;padding:8px 0">No data yet — import a CSV to get started.</div>'}
+      <div class="batch-drag-handle" title="Drag to reorder">⠿</div>
     </div>`;
   });
   // Add new batch card
@@ -1410,9 +1413,10 @@ let _dragSrcIdx=null;
 function setupBatchDrag(){
   const cards=[...document.querySelectorAll('#batchGrid .batch-card:not(.batch-card-add)')];
   cards.forEach((card,idx)=>{
-    card.setAttribute('draggable','true');
+    // Card is NOT draggable by default — only becomes draggable when grabbing the handle.
+    // This prevents draggable="true" from eating click events (a Chrome quirk).
 
-    // Single click router — checks what was actually clicked
+    // Click router — works reliably because card has no draggable attribute
     card.addEventListener('click',e=>{
       const actionEl=e.target.closest('[data-action]');
       if(actionEl){
@@ -1422,11 +1426,16 @@ function setupBatchDrag(){
         else if(action==='clear')window._clearBatch(bid,actionEl.dataset.bname2);
         else if(action==='delete')window._deleteBatch(bid);
         else if(action==='date')window._pickBatchDate(bid,actionEl);
-        return; // never navigate
+        return;
       }
-      // Clicked on the card body — navigate into batch
       window._viewBatch(card.dataset.bname||'');
     });
+
+    // Enable drag only when pressing the drag handle
+    const handle=card.querySelector('.batch-drag-handle');
+    if(handle){
+      handle.addEventListener('mousedown',()=>card.setAttribute('draggable','true'));
+    }
 
     card.addEventListener('dragstart',e=>{
       _dragSrcIdx=idx;
@@ -1435,9 +1444,13 @@ function setupBatchDrag(){
       e.dataTransfer.setData('text/plain',String(idx));
     });
     card.addEventListener('dragend',()=>{
+      card.removeAttribute('draggable');
       card.classList.remove('dragging');
       document.querySelectorAll('#batchGrid .batch-card').forEach(c=>c.classList.remove('drag-over'));
     });
+    // Also clear draggable if the mousedown never turned into a drag
+    card.addEventListener('mouseup',()=>card.removeAttribute('draggable'));
+
     card.addEventListener('dragover',e=>{
       e.preventDefault();
       document.querySelectorAll('#batchGrid .batch-card').forEach(c=>c.classList.remove('drag-over'));
