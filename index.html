@@ -144,6 +144,12 @@
     .batch-card-add:hover{border-color:var(--gold-border);background:var(--gold-glow);}
     .batch-card-add-icon{font-size:24px;opacity:.4;}
     .batch-card-add-label{font-size:12px;color:var(--dim);}
+    .batch-date-btn{font-size:10px;color:var(--dim);margin-top:3px;cursor:pointer;transition:color .15s;display:inline-flex;align-items:center;gap:3px;}
+    .batch-date-btn:hover{color:var(--gold);}
+    .batch-date-set{color:var(--muted);}
+    #batchDatePicker{position:fixed;z-index:9999;background:rgba(6,13,24,.98);border:1px solid rgba(240,165,0,.2);border-radius:12px;padding:14px 16px;box-shadow:0 12px 40px rgba(0,0,0,.7);min-width:200px;}
+    #batchDatePicker input[type=date]{width:100%;padding:8px 10px;border-radius:8px;border:1px solid rgba(51,65,85,.5);background:rgba(12,24,55,.9);color:#f1f5f9;font-size:13px;font-family:inherit;}
+    #batchDatePicker input[type=date]:focus{outline:none;border-color:rgba(240,165,0,.5);}
     /* Drag-and-drop */
     .batch-card[draggable="true"]{cursor:grab;}
     .batch-card[draggable="true"]:active{cursor:grabbing;}
@@ -672,6 +678,56 @@ async function saveBatchOrder(){
     await Promise.all(batches.map((b,i)=>updateDoc(doc(db,'batches',b.id),{sortOrder:i})));
   }catch(e){toast('Error saving order: '+e.message);}
 }
+
+function fmtLeadsDate(d){
+  if(!d)return'';
+  const[y,m,day]=d.split('-');
+  return`${parseInt(day)} ${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][parseInt(m)-1]} ${y}`;
+}
+
+let _batchDateOutsideHandler=null;
+window._pickBatchDate=(batchId,el)=>{
+  const existing=document.getElementById('batchDatePicker');
+  if(existing){
+    if(_batchDateOutsideHandler)document.removeEventListener('click',_batchDateOutsideHandler);
+    existing.remove();
+    if(existing.dataset.bid===batchId)return; // toggle off
+  }
+  const batch=batches.find(b=>b.id===batchId);
+  if(!batch)return;
+  const picker=document.createElement('div');
+  picker.id='batchDatePicker';
+  picker.dataset.bid=batchId;
+  const rect=el.getBoundingClientRect();
+  const top=Math.min(rect.bottom+6,window.innerHeight-160);
+  picker.style.top=top+'px';
+  picker.style.left=Math.max(8,rect.left)+'px';
+  picker.innerHTML=`<div style="font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">Leads received date</div>
+    <input type="date" id="batchDateInput" value="${batch.leadsDate||''}" style="color-scheme:dark"/>
+    <div style="font-size:10px;color:var(--dim);margin-top:8px">Pick date above — saves automatically</div>`;
+  document.body.appendChild(picker);
+  const inp=document.getElementById('batchDateInput');
+  inp.focus();
+  try{inp.showPicker();}catch(e){}
+  inp.addEventListener('change',async()=>{
+    const val=inp.value;
+    if(!val)return;
+    picker.remove();
+    try{
+      await updateDoc(doc(db,'batches',batchId),{leadsDate:val});
+      batch.leadsDate=val;
+      renderBatchGrid();
+      toast(`Leads date set: ${fmtLeadsDate(val)} ✓`);
+    }catch(e){toast('Error: '+e.message);}
+  });
+  _batchDateOutsideHandler=e=>{
+    if(!picker.contains(e.target)&&e.target!==el){
+      picker.remove();
+      document.removeEventListener('click',_batchDateOutsideHandler);
+    }
+  };
+  setTimeout(()=>document.addEventListener('click',_batchDateOutsideHandler),0);
+};
 
 // ── Closings ──
 async function loadClosings(){
@@ -1322,7 +1378,10 @@ function renderBatchGrid(){
         <div class="batch-action-btn del" onclick="window._deleteBatch('${b.id}')" title="Delete batch">✕</div>
       </div>
       <div class="batch-card-head" style="${apptBadge?'margin-top:24px':''}">
-        <div class="batch-card-name">${esc(b.name)}</div>
+        <div>
+          <div class="batch-card-name">${esc(b.name)}</div>
+          <div class="batch-date-btn ${b.leadsDate?'batch-date-set':''}" onclick="event.stopPropagation();window._pickBatchDate('${b.id}',this)">📅 ${b.leadsDate?fmtLeadsDate(b.leadsDate):'Set leads date'}</div>
+        </div>
         <span class="batch-type-tag ${b.type==='axs'?'tag-axs':'tag-ekko'}">${b.type==='axs'?'AXS':'Ekko'}</span>
       </div>
       <div class="batch-card-count">${total}</div>
