@@ -237,6 +237,17 @@
     .p-aka{font-size:10px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
     .p-phone{color:var(--muted);font-size:11px;white-space:nowrap;}
 
+    /* WhatsApp quick-action buttons */
+    .wa-quick-btns{display:flex;gap:4px;margin-top:4px;}
+    .wa-quick{display:inline-flex;align-items:center;gap:2px;font-size:10px;font-weight:700;padding:2px 6px;border-radius:5px;cursor:pointer;text-decoration:none;white-space:nowrap;border:1px solid;transition:all .15s;}
+    .wa-quick.missed{color:#f87171;border-color:rgba(239,68,68,.3);background:rgba(239,68,68,.08);}
+    .wa-quick.missed:hover{background:rgba(239,68,68,.18);border-color:rgba(239,68,68,.5);}
+    .wa-quick.appt{color:#34d399;border-color:rgba(52,211,153,.3);background:rgba(52,211,153,.08);}
+    .wa-quick.appt:hover{background:rgba(52,211,153,.18);border-color:rgba(52,211,153,.5);}
+    /* Template modal textareas */
+    .tmpl-textarea{width:100%;box-sizing:border-box;padding:8px 10px;border-radius:8px;border:1px solid rgba(51,65,85,.5);background:rgba(12,24,55,.9);color:#f1f5f9;font-size:12px;font-family:inherit;resize:vertical;min-height:64px;line-height:1.5;}
+    .tmpl-textarea:focus{outline:none;border-color:rgba(240,165,0,.5);}
+    .tmpl-label{font-size:11px;font-weight:700;margin-bottom:5px;display:block;}
     /* WhatsApp link */
     .wa-link{color:var(--muted);text-decoration:none;font-size:11px;display:flex;align-items:center;gap:4px;transition:color .15s;}
     .wa-link:hover{color:#25d366;}
@@ -467,6 +478,7 @@
     <button class="btn btn-secondary" id="btnImport" style="display:none">↑ Import CSV</button>
     <button class="btn btn-primary" id="btnAdd">+ Add Prospect</button>
     <button class="btn btn-primary" id="btnAddClosing" style="display:none" onclick="window._addClosingModal()">+ Log Closing</button>
+    <button class="btn btn-ghost" id="btnTemplates" onclick="window._templatesModal()" title="Edit WhatsApp message templates">💬 Templates</button>
     <span class="user-email" id="userEmail"></span>
     <button class="btn btn-ghost" id="btnSignOut">Sign out</button>
   </div>
@@ -583,7 +595,7 @@
 
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
-import{getFirestore,collection,doc,getDocs,addDoc,updateDoc,deleteDoc,serverTimestamp,query,orderBy}from"https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import{getFirestore,collection,doc,getDocs,getDoc,addDoc,updateDoc,deleteDoc,setDoc,serverTimestamp,query,orderBy}from"https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import{getAuth,GoogleAuthProvider,signInWithPopup,onAuthStateChanged,signOut}from"https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 
 const FB={apiKey:"AIzaSyDHNHkMmw9b3zY8oE92-EKQcSLBbUh5A8A",authDomain:"ilp-portfolio-tracker.firebaseapp.com",projectId:"ilp-portfolio-tracker",storageBucket:"ilp-portfolio-tracker.firebasestorage.app",messagingSenderId:"229769820838",appId:"1:229769820838:web:964ce7fc3176fb55f6d267"};
@@ -600,6 +612,7 @@ let pendingImport=[];
 let currentView='dashboard';
 let activeBatch=''; // batch filter for prospects view
 let sortState={col:null,dir:'asc'};
+let msgTemplates={ekko_missed:'',ekko_appt:'',axs_missed:'',axs_appt:''};
 
 // ── Income Insurance commission rates (from IAFA-Comms-Tracker) ──
 const WAIVER_TERMS=[{l:"2 years",y:7.50},{l:"3 years",y:8.00},{l:"4 years",y:8.50},{l:"5 years",y:10.00},{l:"6-9 years",y:10.50},{l:"10-14 years",y:22.00},{l:"15-19 years",y:26.00},{l:"20+ years",y:40.00}];
@@ -637,8 +650,15 @@ document.getElementById('btnSignOut').addEventListener('click',()=>signOut(auth)
 
 // ── Load all data ──
 async function loadAll(){
-  await Promise.all([loadBatches(),loadProspects(),loadClosings()]);
+  await Promise.all([loadBatches(),loadProspects(),loadClosings(),loadTemplates()]);
   showDashboard();
+}
+
+async function loadTemplates(){
+  try{
+    const snap=await getDoc(doc(db,'settings','msgTemplates'));
+    if(snap.exists())msgTemplates={...msgTemplates,...snap.data()};
+  }catch(e){console.warn('templates load:',e);}
 }
 
 // ── Batches ──
@@ -1212,6 +1232,78 @@ const SAVINGS_OPTS=['Below S$999','S$1,000 - S$2,499','S$2,500 - S$3,999','Above
 function statusCls(s){return 's-'+(s||'New').replace(/\s/g,'');}
 function waLink(phone){const n=(phone||'').replace(/\D/g,'');return n?`https://wa.me/65${n}`:'#';}
 
+function resolveTemplate(tpl,p){
+  const sal=p.gender==='M'?'Mr':p.gender==='F'?'Ms':'';
+  const name=p.preferredName||p.name||'';
+  return tpl.replace(/\{salutation\}/g,sal).replace(/\{name\}/g,name).trim();
+}
+
+window._waQuickOpen=(pid,type)=>{
+  const p=prospects.find(x=>x.id===pid);
+  if(!p||!p.phone){toast('No phone number for this lead');return;}
+  const isAXS=(p.batch||'').toLowerCase().includes('axs');
+  const key=(isAXS?'axs':'ekko')+'_'+type;
+  const tpl=msgTemplates[key]||'';
+  if(!tpl){toast('No template set — click 💬 Templates to add one.');return;}
+  const msg=resolveTemplate(tpl,p);
+  const n=(p.phone||'').replace(/\D/g,'');
+  window.open(`https://wa.me/65${n}?text=${encodeURIComponent(msg)}`,'_blank');
+};
+
+window._templatesModal=()=>{
+  const existing=document.getElementById('templatesModal');
+  if(existing)existing.remove();
+  const ov=document.createElement('div');
+  ov.className='modal-overlay';
+  ov.id='templatesModal';
+  ov.innerHTML=`<div class="modal-box" style="max-width:580px;width:95vw" onclick="event.stopPropagation()">
+    <div class="modal-title">💬 WhatsApp Message Templates</div>
+    <div style="font-size:11px;color:var(--dim);margin-bottom:20px;line-height:1.6">
+      Placeholders: <code style="background:rgba(255,255,255,.08);padding:1px 5px;border-radius:4px">{salutation}</code> → Mr / Ms &nbsp;|&nbsp;
+      <code style="background:rgba(255,255,255,.08);padding:1px 5px;border-radius:4px">{name}</code> → lead's name<br>
+      <span style="opacity:.7">e.g. "Hi {salutation} {name}, I tried calling you just now..."</span>
+    </div>
+    <div style="display:grid;gap:18px">
+      <div>
+        <span class="tmpl-label" style="color:var(--gold)">📵 EKKO — Missed Call</span>
+        <textarea id="tmpl_ekko_missed" class="tmpl-textarea">${esc(msgTemplates.ekko_missed||'')}</textarea>
+      </div>
+      <div>
+        <span class="tmpl-label" style="color:var(--gold)">📅 EKKO — Appointment Set</span>
+        <textarea id="tmpl_ekko_appt" class="tmpl-textarea">${esc(msgTemplates.ekko_appt||'')}</textarea>
+      </div>
+      <div>
+        <span class="tmpl-label" style="color:#c084fc">📵 AXS — Missed Call</span>
+        <textarea id="tmpl_axs_missed" class="tmpl-textarea">${esc(msgTemplates.axs_missed||'')}</textarea>
+      </div>
+      <div>
+        <span class="tmpl-label" style="color:#c084fc">📅 AXS — Appointment Set</span>
+        <textarea id="tmpl_axs_appt" class="tmpl-textarea">${esc(msgTemplates.axs_appt||'')}</textarea>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:22px">
+      <button class="btn btn-primary" style="flex:1" onclick="window._saveTemplates()">Save Templates</button>
+      <button class="btn btn-ghost" onclick="document.getElementById('templatesModal').remove()">Cancel</button>
+    </div>
+  </div>`;
+  ov.addEventListener('click',()=>ov.remove());
+  document.body.appendChild(ov);
+};
+
+window._saveTemplates=async()=>{
+  msgTemplates={
+    ekko_missed:document.getElementById('tmpl_ekko_missed').value.trim(),
+    ekko_appt:document.getElementById('tmpl_ekko_appt').value.trim(),
+    axs_missed:document.getElementById('tmpl_axs_missed').value.trim(),
+    axs_appt:document.getElementById('tmpl_axs_appt').value.trim(),
+  };
+  try{
+    await setDoc(doc(db,'settings','msgTemplates'),msgTemplates);
+    document.getElementById('templatesModal')?.remove();
+    toast('Templates saved ✓');
+  }catch(e){toast('Error saving: '+e.message);}
+};
+
 // ── Navigation ──
 window._goHome=()=>showDashboard();
 window._dashSearch=q=>{
@@ -1685,6 +1777,10 @@ function renderList(){
       </td>
       <td>
         <a class="wa-link" href="${waLink(p.phone)}" target="_blank" onclick="event.stopPropagation()" title="Open WhatsApp">${esc(p.phone||'—')}</a>
+        ${p.phone?`<div class="wa-quick-btns">
+          <span class="wa-quick missed" onclick="event.stopPropagation();window._waQuickOpen('${p.id}','missed')" title="Send missed call message">📵 Missed</span>
+          <span class="wa-quick appt" onclick="event.stopPropagation();window._waQuickOpen('${p.id}','appt')" title="Send appointment set message">📅 Appt</span>
+        </div>`:''}
       </td>
       <td style="color:var(--muted)">${calcAge(p.birthYear)}</td>
       <td><span class="batch-tag ${isAXS?'axs-tag':''}">${esc(p.batch||'—')}</span></td>
