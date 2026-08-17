@@ -598,7 +598,13 @@ import{initializeApp}from"https://www.gstatic.com/firebasejs/11.1.0/firebase-app
 import{getFirestore,collection,doc,getDocs,getDoc,addDoc,updateDoc,deleteDoc,setDoc,serverTimestamp,query,orderBy}from"https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import{getAuth,GoogleAuthProvider,signInWithPopup,onAuthStateChanged,signOut}from"https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 
-const FB={apiKey:"AIzaSyDHNHkMmw9b3zY8oE92-EKQcSLBbUh5A8A",authDomain:"ilp-portfolio-tracker.firebaseapp.com",projectId:"ilp-portfolio-tracker",storageBucket:"ilp-portfolio-tracker.firebasestorage.app",messagingSenderId:"229769820838",appId:"1:229769820838:web:964ce7fc3176fb55f6d267"};
+const FB={apiKey: "AIzaSyCm7V16tnQj2A9wg3hIGo1aeFDGCZwMzDE",
+  authDomain: "cold-db.firebaseapp.com",
+  projectId: "cold-db",
+  storageBucket: "cold-db.firebasestorage.app",
+  messagingSenderId: "158242353568",
+  appId: "1:158242353568:web:216b89a65c79e00ff374c5"
+};
 const fbApp=initializeApp(FB);
 const db=getFirestore(fbApp);
 const auth=getAuth(fbApp);
