@@ -1255,16 +1255,16 @@ window._templatesModal=()=>{
   const existing=document.getElementById('templatesModal');
   if(existing)existing.remove();
   const ov=document.createElement('div');
-  ov.className='modal-overlay';
+  ov.className='modal-bg';
   ov.id='templatesModal';
-  ov.innerHTML=`<div class="modal-box" style="max-width:580px;width:95vw" onclick="event.stopPropagation()">
-    <div class="modal-title">💬 WhatsApp Message Templates</div>
+  ov.innerHTML=`<div class="modal" style="max-width:580px" onclick="event.stopPropagation()">
+    <h2>💬 WhatsApp Message Templates</h2>
     <div style="font-size:11px;color:var(--dim);margin-bottom:20px;line-height:1.6">
       Placeholders: <code style="background:rgba(255,255,255,.08);padding:1px 5px;border-radius:4px">{salutation}</code> → Mr / Ms &nbsp;|&nbsp;
-      <code style="background:rgba(255,255,255,.08);padding:1px 5px;border-radius:4px">{name}</code> → lead's name<br>
+      <code style="background:rgba(255,255,255,.08);padding:1px 5px;border-radius:4px">{name}</code> → lead name<br>
       <span style="opacity:.7">e.g. "Hi {salutation} {name}, I tried calling you just now..."</span>
     </div>
-    <div style="display:grid;gap:18px">
+    <div style="display:grid;gap:16px">
       <div>
         <span class="tmpl-label" style="color:var(--gold)">📵 EKKO — Missed Call</span>
         <textarea id="tmpl_ekko_missed" class="tmpl-textarea">${esc(msgTemplates.ekko_missed||'')}</textarea>
@@ -1282,8 +1282,8 @@ window._templatesModal=()=>{
         <textarea id="tmpl_axs_appt" class="tmpl-textarea">${esc(msgTemplates.axs_appt||'')}</textarea>
       </div>
     </div>
-    <div style="display:flex;gap:8px;margin-top:22px">
-      <button class="btn btn-primary" style="flex:1" onclick="window._saveTemplates()">Save Templates</button>
+    <div class="modal-footer">
+      <button class="btn btn-primary" onclick="window._saveTemplates()">Save Templates</button>
       <button class="btn btn-ghost" onclick="document.getElementById('templatesModal').remove()">Cancel</button>
     </div>
   </div>`;
