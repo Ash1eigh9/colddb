@@ -478,7 +478,7 @@
     <button class="btn btn-secondary" id="btnImport" style="display:none">↑ Import CSV</button>
     <button class="btn btn-primary" id="btnAdd">+ Add Prospect</button>
     <button class="btn btn-primary" id="btnAddClosing" style="display:none" onclick="window._addClosingModal()">+ Log Closing</button>
-    <button class="btn btn-ghost" id="btnTemplates" onclick="window._templatesModal()" title="Edit WhatsApp message templates">💬 Templates</button>
+    <button class="btn btn-ghost" id="btnTemplates" title="Edit WhatsApp message templates">💬 Templates</button>
     <span class="user-email" id="userEmail"></span>
     <button class="btn btn-ghost" id="btnSignOut">Sign out</button>
   </div>
@@ -647,6 +647,7 @@ onAuthStateChanged(auth,user=>{
 });
 document.getElementById('btnGoogleLogin').addEventListener('click',()=>signInWithPopup(auth,new GoogleAuthProvider()));
 document.getElementById('btnSignOut').addEventListener('click',()=>signOut(auth));
+document.getElementById('btnTemplates').addEventListener('click',()=>window._templatesModal());
 
 // ── Load all data ──
 async function loadAll(){
